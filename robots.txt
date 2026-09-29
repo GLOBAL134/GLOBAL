@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://svc-global.ru/sitemap.xml
