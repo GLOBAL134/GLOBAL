@@ -1,0 +1,11 @@
+name = "global-applications-api"
+main = "src/index.js"
+compatibility_date = "2026-09-30"
+
+[vars]
+ALLOWED_ORIGIN = "https://global134.github.io"
+
+[[kv_namespaces]]
+binding = "RATE_LIMIT"
+id = "27a837b6d13541c6ba5826763a3317e5"
+preview_id = "27a837b6d13541c6ba5826763a3317e5"

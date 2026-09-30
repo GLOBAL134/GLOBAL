@@ -1,0 +1,11 @@
+node_modules/
+.next/
+out/
+_next/
+.DS_Store
+*.zip
+*.log
+.env*
+!.env.example
+.dev.vars
+.dev.vars
