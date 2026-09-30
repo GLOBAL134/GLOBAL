@@ -1,8 +1,8 @@
 import { validateApplication, makeApplicationId, formatTelegramMessage } from "./lib.js";
 
-const json = (body, status, origin) => new Response(JSON.stringify(body), { status, headers: { "content-type":"application/json; charset=utf-8", "access-control-allow-origin":origin, "access-control-allow-methods":"POST,OPTIONS", "access-control-allow-headers":"content-type", "vary":"Origin" } });
+const json = (body, status, origin) => new Response(status === 204 ? null : JSON.stringify(body), { status, headers: { "content-type":"application/json; charset=utf-8", "access-control-allow-origin":origin, "access-control-allow-methods":"POST,OPTIONS", "access-control-allow-headers":"content-type", "vary":"Origin" } });
 
-export default {
+export const createWorker = (fetcher = fetch) => ({
   async fetch(request, env) {
     const origin = request.headers.get("Origin") || "";
     const allowed = origin === env.ALLOWED_ORIGIN || origin === "http://localhost:3000" || origin === "http://127.0.0.1:3000";
@@ -29,14 +29,16 @@ export default {
     }
 
     const application = { id:makeApplicationId(), created_at:new Date().toISOString(), ...checked.value, status:"NEW" };
-    const supabase = await env.fetch(`${env.SUPABASE_URL}/rest/v1/applications`, { method:"POST", headers:{ apikey:env.SUPABASE_SERVICE_ROLE_KEY, authorization:`Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`, "content-type":"application/json", prefer:"return=minimal" }, body:JSON.stringify(application) });
+    const supabase = await fetcher(`${env.SUPABASE_URL}/rest/v1/applications`, { method:"POST", headers:{ apikey:env.SUPABASE_SERVICE_ROLE_KEY, authorization:`Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`, "content-type":"application/json", prefer:"return=minimal" }, body:JSON.stringify(application) });
     if (!supabase.ok) return json({ error:"Не удалось сохранить заявку" }, 502, corsOrigin);
 
-    const telegram = await env.fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, { method:"POST", headers:{"content-type":"application/json"}, body:JSON.stringify({ chat_id:env.TELEGRAM_CHAT_ID, text:formatTelegramMessage(application), disable_web_page_preview:true }) });
+    const telegram = await fetcher(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, { method:"POST", headers:{"content-type":"application/json"}, body:JSON.stringify({ chat_id:env.TELEGRAM_CHAT_ID, text:formatTelegramMessage(application), disable_web_page_preview:true }) });
     if (!telegram.ok) {
-      await env.fetch(`${env.SUPABASE_URL}/rest/v1/applications?id=eq.${encodeURIComponent(application.id)}`, { method:"DELETE", headers:{ apikey:env.SUPABASE_SERVICE_ROLE_KEY, authorization:`Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}` } });
+      await fetcher(`${env.SUPABASE_URL}/rest/v1/applications?id=eq.${encodeURIComponent(application.id)}`, { method:"DELETE", headers:{ apikey:env.SUPABASE_SERVICE_ROLE_KEY, authorization:`Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}` } });
       return json({ error:"Не удалось уведомить менеджера" }, 502, corsOrigin);
     }
     return json({ ok:true, id:application.id }, 201, corsOrigin);
   }
-};
+});
+
+export default createWorker();

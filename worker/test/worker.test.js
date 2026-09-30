@@ -26,7 +26,7 @@ test("telegram message includes lead fields", () => {
   assert.match(text,/НОВАЯ ЗАЯВКА — GLOBAL/); assert.match(text,/G-TEST1234/); assert.match(text,/Япония/);
 });
 
-import worker from "../src/index.js";
+import { createWorker } from "../src/index.js";
 
 const validBody = { name:"Тест", phone:"+79991234567", country:"Япония", purpose:"Туризм", service:"Виза", comment:"Тест", source:"test", consent:true, website:"" };
 const request = () => new Request("https://worker.test/applications", { method:"POST", headers:{"content-type":"application/json", origin:"https://global134.github.io"}, body:JSON.stringify(validBody) });
@@ -34,18 +34,18 @@ const baseEnv = { ALLOWED_ORIGIN:"https://global134.github.io", SUPABASE_URL:"ht
 
 test("Supabase failure returns 502 and does not call Telegram", async () => {
   const calls=[]; const env={...baseEnv, fetch:async (url)=>{calls.push(String(url)); return new Response("failure",{status:500});}};
-  const response=await worker.fetch(request(),env);
+  const response=await createWorker(env.fetch).fetch(request(),env);
   assert.equal(response.status,502); assert.equal(calls.length,1); assert.match(calls[0],/supabase/);
 });
 
 test("Telegram failure returns 502 and rolls back Supabase row", async () => {
   const calls=[]; const env={...baseEnv, fetch:async (url,init)=>{calls.push({url:String(url),method:init.method}); if(String(url).includes("api.telegram.org")) return new Response("failure",{status:500}); return new Response(init.method==="DELETE"?null:"",{status:init.method==="POST"?201:204});}};
-  const response=await worker.fetch(request(),env);
+  const response=await createWorker(env.fetch).fetch(request(),env);
   assert.equal(response.status,502); assert.equal(calls.length,3); assert.equal(calls[2].method,"DELETE"); assert.match(calls[2].url,/applications\?id=eq.G-/);
 });
 
 test("successful dependencies return 201 and a public ID", async () => {
   const env={...baseEnv, fetch:async (_url,init)=>new Response("",{status:init.method==="POST"?201:204})};
-  const response=await worker.fetch(request(),env); const body=await response.json();
+  const response=await createWorker(env.fetch).fetch(request(),env); const body=await response.json();
   assert.equal(response.status,201); assert.match(body.id,/^G-[A-Z0-9]{8}$/);
 });
