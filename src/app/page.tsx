@@ -155,6 +155,28 @@ export default function Home() {
     return () => desktop.removeEventListener("change", closeMenuOnDesktop);
   }, []);
   useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const items = document.querySelectorAll<HTMLElement>("[data-reveal]");
+    if (!items.length || !("IntersectionObserver" in window)) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { rootMargin: "0px 0px -40px 0px", threshold: 0.04 },
+    );
+    items.forEach((item) => observer.observe(item));
+    document.documentElement.classList.add("motion-ready");
+    return () => {
+      observer.disconnect();
+      document.documentElement.classList.remove("motion-ready");
+    };
+  }, []);
+  useEffect(() => {
     document.body.style.overflow = panelOpen ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
@@ -450,7 +472,7 @@ export default function Home() {
         </div>
         <section id="services" className="section services-section">
           <div className="container">
-            <div className="section-heading split">
+            <div className="section-heading split" data-reveal>
               <div>
                 <div className="eyebrow">Экспертиза GLOBAL</div>
                 <h2 className="h2">
@@ -516,7 +538,7 @@ export default function Home() {
         </section>
         <section id="countries" className="section countries-section">
           <div className="container">
-            <div className="section-heading">
+            <div className="section-heading" data-reveal>
               <div className="eyebrow">Направления</div>
               <h2 className="h2">Куда оформляем визы</h2>
               <p>
@@ -534,7 +556,7 @@ export default function Home() {
               />
               <b>{filtered.length} направлений</b>
             </div>
-            <div className="country-showcase">
+            <div className="country-showcase" data-reveal>
               {countries.slice(0, 4).map((c, i) => (
                 <button
                   className={`visual-country vc-${i + 1}`}
@@ -783,7 +805,7 @@ export default function Home() {
         </section>
         <section className="section gallery-section">
           <div className="container">
-            <div className="section-heading">
+            <div className="section-heading" data-reveal>
               <div className="eyebrow">Пространство GLOBAL</div>
               <h2 className="h2">
                 Знакомое место

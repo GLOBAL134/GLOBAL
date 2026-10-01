@@ -80,3 +80,51 @@ test('mobile menu closes and unlocks the page after resizing to desktop', async 
     assert.equal(await page.evaluate(() => document.body.style.overflow), '');
   });
 });
+
+test('motion is restrained, scroll-triggered and disabled for reduced motion', async () => {
+  await withPage(1440, async (page) => {
+    const intro = await page.locator('.hero-copy').evaluate((element) => getComputedStyle(element).animationName);
+    assert.notEqual(intro, 'none', 'hero needs an entrance animation');
+    const heading = page.locator('#countries .section-heading');
+    await heading.scrollIntoViewIfNeeded();
+    await page.waitForFunction(() => {
+      const element = document.querySelector('#countries .section-heading');
+      return element?.classList.contains('is-visible') && getComputedStyle(element).opacity === '1';
+    });
+    assert.equal(await heading.evaluate((element) => getComputedStyle(element).opacity), '1');
+  });
+
+  const browser = await chromium.launch({ headless: true });
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
+  try {
+    await page.goto(baseURL, { waitUntil: 'networkidle' });
+    const state = await page.evaluate(() => ({
+      intro: getComputedStyle(document.querySelector('.hero-copy')).animationName,
+      marquee: getComputedStyle(document.querySelector('.service-marquee > div')).animationName,
+      heading: getComputedStyle(document.querySelector('#countries .section-heading')).opacity,
+    }));
+    assert.equal(state.intro, 'none');
+    assert.equal(state.marquee, 'none');
+    assert.equal(state.heading, '1');
+  } finally {
+    await browser.close();
+  }
+});
+
+test('country detail opens a prefilled consultation form without a second overlay', async () => {
+  await withPage(1440, async (page) => {
+    await page.locator('.visual-country').first().click();
+    const detail = page.getByRole('dialog');
+    assert.equal(await detail.locator('.country-modal').count(), 1);
+    await detail.getByRole('button', { name: 'Получить консультацию' }).click();
+    const form = page.getByRole('dialog').locator('.lead-modal form');
+    await form.waitFor({ state: 'visible' });
+    assert.equal(await page.getByRole('dialog').count(), 1);
+    assert.equal(await form.locator('input[name="country"]').inputValue(), 'Япония');
+    await form.locator('input[name="name"]').fill('Проверка интерфейса');
+    await form.locator('input[name="phone"]').fill('+79991112233');
+    await form.locator('input[name="consent"]').check();
+    assert.equal(await form.locator('input[name="consent"]').isChecked(), true);
+    // No production request: this test verifies interaction, not delivery.
+  });
+});
