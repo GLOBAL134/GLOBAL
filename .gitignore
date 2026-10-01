@@ -8,4 +8,4 @@ _next/
 .env*
 !.env.example
 .dev.vars
-.dev.vars
+*.tsbuildinfo
