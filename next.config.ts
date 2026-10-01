@@ -7,8 +7,8 @@ const nextConfig: NextConfig = {
   env: { NEXT_PUBLIC_APPLICATIONS_API_URL: applicationsApiUrl },
   output: "export",
   trailingSlash: true,
-  basePath: isPagesBuild ? "/GLOBAL" : "",
-  assetPrefix: isPagesBuild ? "/GLOBAL/" : "",
+  basePath: isPagesBuild ? "/site-GLOBAL" : "",
+  assetPrefix: isPagesBuild ? "/site-GLOBAL/" : "",
 };
 
 export default nextConfig;
