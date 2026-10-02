@@ -109,7 +109,6 @@ export default function Home() {
   const [scrolled, setScrolled] = useState(false),
     [menu, setMenu] = useState(false),
     [heroQuery, setHeroQuery] = useState(""),
-    [countryQuery, setCountryQuery] = useState(""),
     [country, setCountry] = useState<PopularDestination | null>(null),
     [schengenChoice, setSchengenChoice] = useState(""),
     [lead, setLead] = useState<LeadPreset | null>(null),
@@ -251,13 +250,6 @@ export default function Home() {
             .slice(0, 6)
         : [],
     [heroQuery],
-  );
-  const filtered = useMemo(
-    () =>
-      countries.filter((x) =>
-        x.name.toLowerCase().includes(countryQuery.toLowerCase()),
-      ),
-    [countryQuery],
   );
   const applicableExtras = useMemo(
     () => getApplicableExtras(calcService),
@@ -561,16 +553,6 @@ export default function Home() {
                 направление специалисту.
               </p>
             </div>
-            <div className="country-search">
-              <SvgIcon type="search" />
-              <input
-                aria-label="Найти страну"
-                value={countryQuery}
-                onChange={(e) => setCountryQuery(e.target.value)}
-                placeholder="Найти страну"
-              />
-              <b>{filtered.length} направлений</b>
-            </div>
             <div className="country-showcase" data-reveal>
               {popularDestinations.map((c, i) => (
                 <button
@@ -598,15 +580,11 @@ export default function Home() {
             </div>
             <div className="country-directory">
               {countryGroups.map((group) => {
-                const items = group.countries.filter((item) =>
-                  item.name.toLowerCase().includes(countryQuery.toLowerCase()),
-                );
-                if (!items.length) return null;
                 return (
                   <div className="country-group" key={group.name}>
                     <h3>{group.name}</h3>
                     <div className="country-group-list">
-                      {items.map((c) => (
+                      {group.countries.map((c) => (
                         <button key={c.name} onClick={() => openCountry(c)}>
                           <span className="country-mini-flag" aria-hidden="true">
                             {c.flag}

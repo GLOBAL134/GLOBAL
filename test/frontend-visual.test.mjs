@@ -139,37 +139,68 @@ test('country detail uses a flag fallback when no country image exists', async (
   });
 });
 
-test('country search and calculator expose the exact 36-country source', async () => {
-  await withPage(1440, async (page) => {
-    await page.locator('#countries').scrollIntoViewIfNeeded();
-    assert.equal(await page.locator('.country-group-list button').count(), 36);
-    assert.equal(await page.locator('.country-group').nth(0).locator('button').count(), 29);
-    assert.equal(await page.locator('.country-group').nth(1).locator('button').count(), 7);
-    assert.equal(await page.locator('.country-group-list').getByText('Ирландия').count(), 0);
+test('country directory keeps all 36 entries, removes the secondary search, and preserves hero search', async () => {
+  for (const width of [1920, 1440, 390]) {
+    await withPage(width, async (page) => {
+      await page.locator('#countries').scrollIntoViewIfNeeded();
+      assert.equal(await page.locator('.country-search').count(), 0, `${width}px: secondary country search remains`);
+      assert.equal(await page.locator('.country-group-list button').count(), 36);
+      assert.equal(await page.locator('.country-group').nth(0).locator('button').count(), 29);
+      assert.equal(await page.locator('.country-group').nth(1).locator('button').count(), 7);
+      assert.equal(await page.locator('.country-group-list').getByText('Ирландия').count(), 0);
 
-    const search = page.getByRole('textbox', { name: 'Найти страну' });
-    await search.fill('Лихтенштейн');
-    assert.equal(await page.locator('.country-group-list button').count(), 1);
-    assert.equal(await page.locator('.country-group-list button').first().innerText(), '🇱🇮\nЛихтенштейн\n→');
+      const state = await page.evaluate(() => {
+        const heading = document.querySelector('#countries .section-heading');
+        const showcase = document.querySelector('#countries .country-showcase');
+        const headingRect = heading?.getBoundingClientRect();
+        const showcaseRect = showcase?.getBoundingClientRect();
+        const cards = [...document.querySelectorAll('#countries .visual-country')];
+        return {
+          gap: (showcaseRect?.top ?? 0) - (headingRect?.bottom ?? 0),
+          cards: cards.map((card) => {
+            const rect = card.getBoundingClientRect();
+            return {
+              width: rect.width,
+              height: rect.height,
+              cursor: getComputedStyle(card).cursor,
+            };
+          }),
+          heroSearch: document.querySelector('#hero-country')?.getAttribute('placeholder'),
+        };
+      });
+      assert.equal(state.gap, 28, `${width}px: country cards need the standard heading gap`);
+      assert.equal(state.heroSearch, 'Введите страну…', `${width}px: hero search was removed or changed`);
+      assert.equal(state.cards.length, 4, `${width}px: popular card count changed`);
+      for (const [index, card] of state.cards.entries()) {
+        assert.ok(card.width > 0 && card.height > 0, `${width}px card ${index}: card has no clickable size`);
+        assert.equal(card.cursor, 'pointer', `${width}px card ${index}: card is not clickable`);
+      }
 
-    const countrySelect = page.locator('.calculator .calc-panel select').nth(0);
-    const serviceSelect = page.locator('.calculator .calc-panel select').nth(1);
-    assert.equal(await countrySelect.locator('option').count(), 36);
-    assert.equal(await countrySelect.locator('option[value="Шенген"]').count(), 0);
-    assert.equal(await serviceSelect.locator('option').count(), 4);
+      const countrySelect = page.locator('.calculator .calc-panel select').nth(0);
+      const serviceSelect = page.locator('.calculator .calc-panel select').nth(1);
+      assert.equal(await countrySelect.locator('option').count(), 36);
+      assert.equal(await countrySelect.locator('option[value="Шенген"]').count(), 0);
+      assert.equal(await serviceSelect.locator('option').count(), 4);
 
-    const extras = page.locator('.calculator fieldset input[type="checkbox"]');
-    assert.deepEqual(await extras.evaluateAll((inputs) => inputs.map((input) => input.value)), [
-      'Медицинское страхование путешественников',
-      'Нотариально заверенный перевод',
-      'Фото и копировальные услуги',
-    ]);
-    await serviceSelect.selectOption('Медицинское страхование путешественников');
-    assert.deepEqual(await extras.evaluateAll((inputs) => inputs.map((input) => input.value)), [
-      'Нотариально заверенный перевод',
-      'Фото и копировальные услуги',
-    ]);
-  });
+      const extras = page.locator('.calculator fieldset input[type="checkbox"]');
+      assert.deepEqual(await extras.evaluateAll((inputs) => inputs.map((input) => input.value)), [
+        'Медицинское страхование путешественников',
+        'Нотариально заверенный перевод',
+        'Фото и копировальные услуги',
+      ]);
+      await serviceSelect.selectOption('Медицинское страхование путешественников');
+      assert.deepEqual(await extras.evaluateAll((inputs) => inputs.map((input) => input.value)), [
+        'Нотариально заверенный перевод',
+        'Фото и копировальные услуги',
+      ]);
+
+      for (const card of await page.locator('.visual-country').all()) {
+        await card.click();
+        assert.equal(await page.locator('.country-modal').count(), 1, `${width}px: popular card is not clickable`);
+        await page.getByRole('button', { name: 'Закрыть окно' }).click();
+      }
+    });
+  }
 });
 
 test('wizard uses a real country and service preset without posting', async () => {

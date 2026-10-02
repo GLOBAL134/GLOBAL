@@ -321,13 +321,11 @@ summary:focus-visible {
   color: var(--ink);
   box-shadow: 0 22px 55px rgba(0, 0, 0, 0.23);
 }
-.search-shell svg,
-.country-search svg {
+.search-shell svg {
   width: 22px;
   height: 22px;
 }
-.search-shell input,
-.country-search input {
+.search-shell input {
   border: 0;
   outline: 0;
   background: transparent;
@@ -678,22 +676,8 @@ summary:focus-visible {
 .countries-section .section-heading > p {
   margin-top: 10px;
 }
-.country-search {
-  max-width: 700px;
-  height: 68px;
-  background: white;
-  border-radius: 18px;
-  padding: 0 20px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
+.countries-section .section-heading {
   margin-bottom: 28px;
-  box-shadow: 0 15px 45px rgba(17, 38, 29, 0.07);
-}
-.country-search b {
-  font-size: 12px;
-  white-space: nowrap;
-  color: var(--muted);
 }
 .country-showcase {
   display: grid;
