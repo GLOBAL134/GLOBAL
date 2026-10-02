@@ -30,7 +30,8 @@ const SvgIcon = ({
     | "visa"
     | "passport"
     | "shield"
-    | "copy";
+    | "copy"
+    | "translate";
 }) => {
   const paths = {
     search: (
@@ -68,6 +69,11 @@ const SvgIcon = ({
       <>
         <path d="M12 3 20 6v5c0 5-3.4 8.2-8 10-4.6-1.8-8-5-8-10V6l8-3Z" />
         <path d="m9 12 2 2 4-4" />
+      </>
+    ),
+    translate: (
+      <>
+        <path d="M3 5h12M9 3v2M5 5c1 5 4 8 9 10M13 5c-1 5-4 8-9 10M14 21l4-10 4 10M15.5 17h5" />
       </>
     ),
     copy: (

@@ -16,7 +16,7 @@ export type Service = {
   detailTitle?: string;
   detailDescription?: string;
   insurers?: string[];
-  icon: "visa" | "shield" | "copy";
+  icon: "visa" | "shield" | "copy" | "translate";
 };
 
 export type AggregateDestination = {
@@ -231,7 +231,7 @@ export const services: Service[] = [
     detailTitle: "Перевод документов на английский язык",
     detailDescription:
       "Поможем подготовить перевод документов на английский язык и оформить нотариальное заверение.",
-    icon: "copy",
+    icon: "translate",
   },
   {
     name: "Фото и копировальные услуги",
