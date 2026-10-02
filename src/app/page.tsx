@@ -8,10 +8,15 @@ import ApplicationForm, {
 import { GlobalEmblem, GlobalLogo } from "../components/Brand";
 import {
   countries,
+  countryGroups,
   photos,
+  popularDestinations,
   reviews,
+  SCHENGEN_COUNTRIES,
   services,
-  type Country,
+  getApplicableExtras,
+  visaService,
+  type PopularDestination,
 } from "./site-data";
 
 const SvgIcon = ({
@@ -105,7 +110,8 @@ export default function Home() {
     [menu, setMenu] = useState(false),
     [heroQuery, setHeroQuery] = useState(""),
     [countryQuery, setCountryQuery] = useState(""),
-    [country, setCountry] = useState<Country | null>(null),
+    [country, setCountry] = useState<PopularDestination | null>(null),
+    [schengenChoice, setSchengenChoice] = useState(""),
     [lead, setLead] = useState<LeadPreset | null>(null),
     [service, setService] = useState<number | null>(null),
     [wizardOpen, setWizardOpen] = useState(false),
@@ -115,7 +121,7 @@ export default function Home() {
     [reviewIndex, setReviewIndex] = useState(0),
     [applicants, setApplicants] = useState(1),
     [calcCountry, setCalcCountry] = useState("Япония"),
-    [calcService, setCalcService] = useState("Оформление виз"),
+    [calcService, setCalcService] = useState(visaService.formName),
     [extras, setExtras] = useState<string[]>([]),
     [copied, setCopied] = useState(false);
   const previousFocus = useRef<HTMLElement | null>(null);
@@ -253,11 +259,28 @@ export default function Home() {
       ),
     [countryQuery],
   );
+  const applicableExtras = useMemo(
+    () => getApplicableExtras(calcService),
+    [calcService],
+  );
   const price = countries.find((x) => x.name === calcCountry)?.price;
   const total =
-    price && calcService === "Оформление виз" ? price * applicants : null;
+    price && calcService === visaService.formName ? price * applicants : null;
   const openLead = (preset: LeadPreset) =>
     setLead({ ...preset, source: preset.source || "website-modal" });
+  const openCountry = (destination: PopularDestination) => {
+    setSchengenChoice("");
+    setCountry(destination);
+  };
+  const openServiceLead = (item: (typeof services)[number], source = "service") =>
+    openLead({
+      service: item.formName,
+      comment:
+        item.formName === "Нотариально заверенный перевод"
+          ? "Язык: Английский"
+          : undefined,
+      source,
+    });
   const startWizard = () => {
     setWizard(initialWizard);
     setWizardStep(1);
@@ -409,7 +432,7 @@ export default function Home() {
                       <button
                         key={c.name}
                         onClick={() => {
-                          setCountry(c);
+                          openCountry(c);
                           setHeroQuery("");
                         }}
                       >
@@ -438,7 +461,7 @@ export default function Home() {
             </div>
             <div className="travel-scene">
               <div className="travel-photo">
-                <img src={countries[0].image} alt="Токио" />
+                <img src={popularDestinations[0].image} alt="Токио" />
                 <span>Tokyo · Japan</span>
               </div>
               <div className="passport-card">
@@ -502,15 +525,8 @@ export default function Home() {
                   <p>{services[0].description}</p>
                   <div className="inline-actions">
                     <button onClick={() => setService(0)}>Подробнее</button>
-                    <button
-                      onClick={() =>
-                        openLead({
-                          service: services[0].name,
-                          source: "service",
-                        })
-                      }
-                    >
-                      Заказать →
+                    <button onClick={() => openServiceLead(services[0])}>
+                      Оставить заявку →
                     </button>
                   </div>
                 </div>
@@ -523,13 +539,13 @@ export default function Home() {
                     <div>
                       <h3>{s.name}</h3>
                       <p>{s.description}</p>
+                      <div className="inline-actions">
+                        <button onClick={() => setService(i + 1)}>Подробнее</button>
+                        <button onClick={() => openServiceLead(s)}>
+                          Оставить заявку
+                        </button>
+                      </div>
                     </div>
-                    <button
-                      aria-label={`Подробнее об услуге ${s.name}`}
-                      onClick={() => setService(i + 1)}
-                    >
-                      ↗
-                    </button>
                   </article>
                 ))}
               </div>
@@ -557,11 +573,11 @@ export default function Home() {
               <b>{filtered.length} направлений</b>
             </div>
             <div className="country-showcase" data-reveal>
-              {countries.slice(0, 4).map((c, i) => (
+              {popularDestinations.map((c, i) => (
                 <button
                   className={`visual-country vc-${i + 1}`}
                   key={c.name}
-                  onClick={() => setCountry(c)}
+                  onClick={() => openCountry(c)}
                 >
                   <img src={c.image} alt={c.name} />
                   <span className="visual-shade" />
@@ -571,22 +587,39 @@ export default function Home() {
                   <div>
                     <small>{c.group}</small>
                     <h3>{c.name}</h3>
-                    <p>{c.service || "Консультация по направлению"}</p>
+                    <p>
+                      {"aggregate" in c
+                        ? "Выберите конкретную страну"
+                        : c.service || "Консультация по направлению"}
+                    </p>
                     <b>Подробнее →</b>
                   </div>
                 </button>
               ))}
             </div>
             <div className="country-directory">
-              {filtered.map((c) => (
-                <button key={c.name} onClick={() => setCountry(c)}>
-                  <span className="country-mini-flag" aria-hidden="true">
-                    {c.flag}
-                  </span>
-                  <span className="country-directory-name">{c.name}</span>
-                  <i>→</i>
-                </button>
-              ))}
+              {countryGroups.map((group) => {
+                const items = group.countries.filter((item) =>
+                  item.name.toLowerCase().includes(countryQuery.toLowerCase()),
+                );
+                if (!items.length) return null;
+                return (
+                  <div className="country-group" key={group.name}>
+                    <h3>{group.name}</h3>
+                    <div className="country-group-list">
+                      {items.map((c) => (
+                        <button key={c.name} onClick={() => openCountry(c)}>
+                          <span className="country-mini-flag" aria-hidden="true">
+                            {c.flag}
+                          </span>
+                          <span className="country-directory-name">{c.name}</span>
+                          <i>→</i>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -638,8 +671,10 @@ export default function Home() {
                   value={calcCountry}
                   onChange={(e) => setCalcCountry(e.target.value)}
                 >
-                  {countries.slice(0, 4).map((c) => (
-                    <option key={c.name}>{c.name}</option>
+                  {countries.map((c) => (
+                    <option key={c.name} value={c.name}>
+                      {c.name}
+                    </option>
                   ))}
                 </select>
               </label>
@@ -647,10 +682,15 @@ export default function Home() {
                 Основная услуга
                 <select
                   value={calcService}
-                  onChange={(e) => setCalcService(e.target.value)}
+                  onChange={(e) => {
+                    setCalcService(e.target.value);
+                    setExtras([]);
+                  }}
                 >
                   {services.map((s) => (
-                    <option key={s.name}>{s.name}</option>
+                    <option key={s.formName} value={s.formName}>
+                      {s.name}
+                    </option>
                   ))}
                 </select>
               </label>
@@ -674,20 +714,21 @@ export default function Home() {
               </div>
               <fieldset>
                 <legend>Дополнительные услуги</legend>
-                {["Страхование", "Фото", "Копирование документов"].map((x) => (
-                  <label key={x}>
+                {applicableExtras.map((extra) => (
+                  <label key={extra.formName}>
                     <input
                       type="checkbox"
-                      checked={extras.includes(x)}
+                      value={extra.formName}
+                      checked={extras.includes(extra.formName)}
                       onChange={() =>
                         setExtras(
-                          extras.includes(x)
-                            ? extras.filter((y) => y !== x)
-                            : [...extras, x],
+                          extras.includes(extra.formName)
+                            ? extras.filter((y) => y !== extra.formName)
+                            : [...extras, extra.formName],
                         )
                       }
                     />
-                    <span>{x}</span>
+                    <span>{extra.name}</span>
                   </label>
                 ))}
               </fieldset>
@@ -1005,9 +1046,8 @@ export default function Home() {
               {country.image ? (
                 <img src={country.image} alt={country.name} />
               ) : (
-                <div className="country-placeholder">
-                  <span>{country.flag}</span>
-                  <SvgIcon type="plane" />
+                <div className="country-placeholder" aria-label={`Флаг ${country.name}`}>
+                  <span aria-hidden="true">{country.flag}</span>
                 </div>
               )}
             </div>
@@ -1017,37 +1057,66 @@ export default function Home() {
                 {country.flag} {country.name}
               </h2>
               <p>{country.summary}</p>
-              <div className="detail-list">
-                <div>
-                  <span>Услуга</span>
-                  <b>{country.service || "Определит специалист"}</b>
+              {"aggregate" in country ? (
+                <div className="field full">
+                  <label htmlFor="schengen-country-select">
+                    Выберите конкретную страну Шенгенской зоны
+                  </label>
+                  <select
+                    id="schengen-country-select"
+                    value={schengenChoice}
+                    onChange={(event) => setSchengenChoice(event.target.value)}
+                  >
+                    <option value="">Выберите страну</option>
+                    {SCHENGEN_COUNTRIES.map((name) => (
+                      <option key={name} value={name}>
+                        {name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-                <div>
-                  <span>Стоимость услуги GLOBAL</span>
-                  <b>
-                    {country.price
-                      ? `${country.price.toLocaleString("ru-RU")} ₽`
-                      : "Уточняется"}
-                  </b>
+              ) : (
+                <div className="detail-list">
+                  <div>
+                    <span>Услуга</span>
+                    <b>{country.service || "Уточняется"}</b>
+                  </div>
+                  <div>
+                    <span>Стоимость услуги GLOBAL</span>
+                    <b>
+                      {country.price
+                        ? `${country.price.toLocaleString("ru-RU")} ₽`
+                        : "Уточняется"}
+                    </b>
+                  </div>
+                  <div>
+                    <span>Документы</span>
+                    <b>Зависят от цели поездки</b>
+                  </div>
                 </div>
-                <div>
-                  <span>Документы</span>
-                  <b>Зависят от цели поездки</b>
-                </div>
-              </div>
+              )}
               <button
                 className="btn btn-dark"
+                disabled={"aggregate" in country && !schengenChoice}
                 onClick={() => {
                   const c = country;
+                  const selectedCountry =
+                    "aggregate" in c ? schengenChoice : c.name;
+                  if (!selectedCountry || selectedCountry === "Шенген") return;
                   setCountry(null);
                   openLead({
-                    country: c.name,
-                    service: c.service || "Оформление визы",
+                    country: selectedCountry,
+                    service:
+                      "aggregate" in c
+                      ? visaService.formName
+                      : c.formService || visaService.formName,
                     source: "country-detail",
                   });
                 }}
               >
-                Получить консультацию
+                {"aggregate" in country
+                  ? "Выбрать страну и получить консультацию"
+                  : "Получить консультацию"}
               </button>
             </div>
           </div>
@@ -1066,7 +1135,11 @@ export default function Home() {
             <SvgIcon type={services[service].icon} />
             <div className="eyebrow">Услуга GLOBAL</div>
             <h2>{services[service].name}</h2>
-            <p>{services[service].description}</p>
+            {services[service].detailTitle && <h3>{services[service].detailTitle}</h3>}
+            <p>{services[service].detailDescription || services[service].description}</p>
+            {services[service].insurers && (
+              <p>Страховщики: {services[service].insurers.join(", ")}.</p>
+            )}
             <ul>
               <li>Уточняем исходные данные</li>
               <li>Объясняем применимые требования</li>
@@ -1075,12 +1148,12 @@ export default function Home() {
             <button
               className="btn btn-dark"
               onClick={() => {
-                const s = services[service];
+                const selectedService = services[service];
                 setService(null);
-                openLead({ service: s.name, source: "service-detail" });
+                openServiceLead(selectedService, "service-detail");
               }}
             >
-              Заказать услугу
+              Получить консультацию
             </button>
           </div>
         </div>
@@ -1262,7 +1335,7 @@ export default function Home() {
                     openLead({
                       country: wizard.country,
                       purpose: wizard.purpose,
-                      service: "Подбор визового решения",
+                      service: visaService.formName,
                       comment: `Дата: ${wizard.date || "не указана"}. Путешественников: ${wizard.travelers}. Загранпаспорт: ${wizard.passport}.`,
                       source: "visa-wizard",
                     });

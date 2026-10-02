@@ -531,6 +531,7 @@ summary:focus-visible {
   gap: 18px;
 }
 .service-feature {
+  min-width: 0;
   min-height: 570px;
   background: var(--forest);
   color: white;
@@ -606,11 +607,24 @@ summary:focus-visible {
   font-weight: 800;
   cursor: pointer;
 }
+.service-list .inline-actions {
+  margin-top: 14px;
+}
+.service-list .inline-actions button {
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background: none;
+  color: var(--forest);
+  padding: 0;
+}
 .service-list {
+  min-width: 0;
   display: grid;
   gap: 12px;
 }
 .service-list article {
+  min-width: 0;
   background: white;
   border-radius: 24px;
   padding: 24px;
@@ -619,6 +633,9 @@ summary:focus-visible {
   gap: 14px;
   align-items: center;
   transition: 0.25s;
+}
+.service-list article > * {
+  min-width: 0;
 }
 .service-list article:hover {
   transform: translateY(-3px);
@@ -768,7 +785,23 @@ summary:focus-visible {
   gap: 10px 14px;
   margin-top: 22px;
 }
+.country-group {
+  grid-column: 1/-1;
+}
+.country-group h3 {
+  margin: 18px 0 10px;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.country-group-list {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px 14px;
+}
 .country-directory button {
+  min-width: 0;
   border: 1px solid rgba(18, 35, 28, 0.1);
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.38);
@@ -1500,6 +1533,14 @@ summary:focus-visible {
 .service-modal li {
   margin: 10px 0;
 }
+.service-modal h3 {
+  font-size: clamp(22px, 3vw, 30px);
+  line-height: 1.08;
+  margin: 12px 0;
+}
+.service-modal .field {
+  margin: 22px 0;
+}
 .lead-modal {
   width: min(760px, 100%);
   padding: 30px;
@@ -1758,6 +1799,9 @@ summary:focus-visible {
   .country-directory {
     grid-template-columns: repeat(3, 1fr);
   }
+  .country-group-list {
+    grid-template-columns: repeat(3, 1fr);
+  }
   .why-grid {
     grid-template-columns: 1fr 1.5fr;
   }
@@ -1937,6 +1981,11 @@ summary:focus-visible {
     grid-row: auto;
   }
   .country-directory {
+    min-width: 0;
+    grid-template-columns: 1fr 1fr;
+  }
+  .country-group-list {
+    min-width: 0;
     grid-template-columns: 1fr 1fr;
   }
   .promo-grid {
@@ -2105,6 +2154,9 @@ summary:focus-visible {
     font-size: 46px;
   }
   .country-directory {
+    grid-template-columns: 1fr;
+  }
+  .country-group-list {
     grid-template-columns: 1fr;
   }
 
