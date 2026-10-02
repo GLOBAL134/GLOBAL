@@ -375,7 +375,7 @@ summary:focus-visible {
   color: var(--muted);
 }
 .hero-proof {
-  display: flex;
+  display: none;
   gap: 25px;
   margin-top: 27px;
   color: #b8c9c1;
@@ -1059,6 +1059,7 @@ summary:focus-visible {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: 62% 50%;
 }
 .office-editorial:after {
   content: "";
@@ -1127,9 +1128,34 @@ summary:focus-visible {
   align-content: end;
 }
 .review-links a {
-  padding: 20px;
-  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: white;
   font-weight: 800;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+.review-links a:hover {
+  background: #f1f4ec;
+  border-color: #aebbb3;
+  transform: translateY(-2px);
+}
+.review-links a b {
+  display: inline-block;
+  flex: 0 0 auto;
+  font-size: 18px;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+.review-links a:hover b {
+  transform: translate(3px, -3px);
 }
 .gallery-section {
   background: #101d18;
@@ -1162,6 +1188,9 @@ summary:focus-visible {
 .gallery-masonry button:hover img {
   transform: scale(1.05);
 }
+.gallery-masonry img[src*="global-office.webp"] {
+  object-position: 62% 50%;
+}
 .gallery-masonry span {
   position: absolute;
   bottom: 14px;
@@ -1181,6 +1210,9 @@ summary:focus-visible {
   position: sticky;
   top: 100px;
   align-self: start;
+}
+.faq-grid > div:first-child .btn {
+  margin-top: 28px;
 }
 .faq-grid details {
   border-bottom: 1px solid var(--line);
@@ -1910,11 +1942,11 @@ summary:focus-visible {
     width: 100%;
   }
   .hero-proof {
-    overflow-x: auto;
-    gap: 18px;
+    overflow: visible;
+    gap: 10px;
   }
   .hero-proof span {
-    min-width: 105px;
+    min-width: 0;
   }
   .travel-scene {
     height: 430px;
@@ -2147,6 +2179,23 @@ summary:focus-visible {
   }
   .lightbox-next {
     right: 8px;
+  }
+}
+@media (max-width: 767px) {
+  .hero-proof {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    color: #dbe9e2;
+  }
+  .hero-proof span {
+    min-width: 0;
+  }
+  .hero-proof b {
+    color: #fff;
+  }
+  .faq-grid > div:first-child .btn {
+    margin-top: 22px;
   }
 }
 @media (max-width: 390px) {

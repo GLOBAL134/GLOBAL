@@ -33,9 +33,11 @@ export type PopularDestination = Country | AggregateDestination;
 export const NEUTRAL_COUNTRY_SUMMARY =
   "Условия оформления зависят от цели поездки и ситуации заявителя. Оставьте заявку — специалист GLOBAL проконсультирует по вашему случаю.";
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+
 export const photos = [
   "https://avatars.mds.yandex.net/get-altay/17637863/2a0000019c669dfc607d71279ab8b7c2625b/orig",
-  "https://avatars.mds.yandex.net/get-altay/18140291/2a0000019c6f642009f1dd72cd2c3665f869/XXL_height",
+  `${basePath}/images/global-office.webp`,
   "https://avatars.mds.yandex.net/get-altay/18111128/2a0000019c669814a8294c3839199ba1cf8a/XXL_height",
 ];
 

@@ -660,8 +660,8 @@ export default function Home() {
               <div className="eyebrow">Предварительный расчёт</div>
               <h2 className="h2">Соберите параметры поездки</h2>
               <p>
-                Показываем сумму только там, где опубликована стоимость услуги
-                GLOBAL.
+                Показываем стоимость только в тех случаях, когда стоимость услуги
+                GLOBAL подтверждена и опубликована.
               </p>
             </div>
             <div className="calc-panel">
@@ -832,13 +832,15 @@ export default function Home() {
                   href="https://2gis.ru/novosibirsk/firm/141265770283147/tab/reviews"
                   target="_blank"
                 >
-                  Все отзывы на 2ГИС ↗
+                  <span>Все отзывы на 2ГИС</span>
+                  <b data-review-arrow aria-hidden="true">↗</b>
                 </a>
                 <a
                   href="https://yandex.ru/maps/org/global/1780859090/reviews/"
                   target="_blank"
                 >
-                  Все отзывы на Яндекс Картах ↗
+                  <span>Все отзывы на Яндекс Картах</span>
+                  <b data-review-arrow aria-hidden="true">↗</b>
                 </a>
               </div>
             </div>
@@ -931,7 +933,7 @@ export default function Home() {
               <ul>
                 <li>Данные не попадают в URL</li>
                 <li>Заявка получает уникальный номер</li>
-                <li>Данные используются только для связи</li>
+                <li>Данные используются только для связи по вашей заявке</li>
               </ul>
             </div>
             <ApplicationForm preset={{ source: "website-main" }} />
