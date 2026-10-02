@@ -118,11 +118,11 @@ test('FAQ, calculator copy, trust copy and review links match the point-fix cont
     );
     assert.equal(
       contract.trustMessage,
-      'Заявка поступит специалисту GLOBAL. Уточним следующий шаг без необоснованных обещаний.',
+      'После отправки заявка поступит специалисту GLOBAL. Мы свяжемся с вами, уточним детали поездки и подскажем дальнейшие шаги.',
     );
-    assert.match(contract.trust, /Данные не попадают в URL/);
-    assert.match(contract.trust, /Заявка получает уникальный номер/);
-    assert.match(contract.trust, /Данные используются только для связи по вашей заявке/);
+    assert.match(contract.trust, /Персональная консультация/);
+    assert.match(contract.trust, /Уникальный номер каждой заявки/);
+    assert.match(contract.trust, /Контактные данные используются только для связи по вашей заявке/);
     assert.equal(contract.reviewLinks.length, 2);
     for (const link of contract.reviewLinks) {
       assert.notEqual(link.borderStyle, 'none');

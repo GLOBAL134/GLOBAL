@@ -233,7 +233,8 @@ summary:focus-visible {
   background:
     radial-gradient(circle at 78% 15%, #326b54 0, transparent 33%),
     linear-gradient(135deg, #092219, #123a2c 60%, #081c15);
-  overflow: hidden;
+  overflow-x: clip;
+  overflow-y: visible;
 }
 .hero:after {
   content: "";
@@ -265,7 +266,7 @@ summary:focus-visible {
 }
 .hero-grid {
   position: relative;
-  z-index: 2;
+  z-index: 4;
   min-height: 690px;
   display: grid;
   grid-template-columns: 1.03fr 0.97fr;
@@ -343,7 +344,7 @@ summary:focus-visible {
 }
 .search-results {
   position: absolute;
-  z-index: 10;
+  z-index: 80;
   left: 0;
   right: 0;
   top: 94px;
@@ -521,9 +522,13 @@ summary:focus-visible {
 .section-heading.split {
   max-width: none;
   display: grid;
-  grid-template-columns: 1.5fr 0.5fr;
-  align-items: end;
-  gap: 70px;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+  align-items: center;
+  gap: 40px;
+  margin-bottom: 34px;
+}
+.services-section .section-heading.split > p {
+  margin-top: 10px;
 }
 .service-editorial {
   display: grid;
@@ -627,15 +632,18 @@ summary:focus-visible {
   min-width: 0;
   background: white;
   border-radius: 24px;
-  padding: 24px;
+  padding: 28px 24px 24px;
   display: grid;
-  grid-template-columns: 35px 52px 1fr 42px;
+  grid-template-columns: 52px minmax(0, 1fr);
   gap: 14px;
   align-items: center;
   transition: 0.25s;
 }
 .service-list article > * {
   min-width: 0;
+}
+.service-list article > div {
+  padding-top: 8px;
 }
 .service-list article:hover {
   transform: translateY(-3px);
@@ -666,6 +674,9 @@ summary:focus-visible {
 }
 .countries-section {
   background: #e7e9df;
+}
+.countries-section .section-heading > p {
+  margin-top: 10px;
 }
 .country-search {
   max-width: 700px;
@@ -863,6 +874,17 @@ summary:focus-visible {
   color: #bcd0c6;
   line-height: 1.8;
   max-width: 620px;
+}
+.promo-grid > div:first-child {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
+}
+.promo-grid > div:first-child h2,
+.promo-grid > div:first-child > p,
+.promo-grid > div:first-child .btn {
+  margin: 0;
 }
 .promo-grid .btn span {
   font-size: 10px;
@@ -1989,7 +2011,7 @@ summary:focus-visible {
     transform: scale(0.8);
   }
   .service-list article {
-    grid-template-columns: 28px 43px 1fr;
+    grid-template-columns: 43px minmax(0, 1fr);
   }
   .service-list article > button {
     display: none;

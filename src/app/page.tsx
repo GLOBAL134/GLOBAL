@@ -534,7 +534,6 @@ export default function Home() {
               <div className="service-list">
                 {services.slice(1).map((s, i) => (
                   <article key={s.name}>
-                    <span className="service-number">0{i + 2}</span>
                     <SvgIcon type={s.icon} />
                     <div>
                       <h3>{s.name}</h3>
@@ -927,13 +926,13 @@ export default function Home() {
               <div className="eyebrow light">Начните с консультации</div>
               <h2>Расскажите о вашей поездке</h2>
               <p>
-                Заявка поступит специалисту GLOBAL. Уточним следующий шаг без
-                необоснованных обещаний.
+                После отправки заявка поступит специалисту GLOBAL. Мы свяжемся
+                с вами, уточним детали поездки и подскажем дальнейшие шаги.
               </p>
               <ul>
-                <li>Данные не попадают в URL</li>
-                <li>Заявка получает уникальный номер</li>
-                <li>Данные используются только для связи по вашей заявке</li>
+                <li>Персональная консультация</li>
+                <li>Уникальный номер каждой заявки</li>
+                <li>Контактные данные используются только для связи по вашей заявке</li>
               </ul>
             </div>
             <ApplicationForm preset={{ source: "website-main" }} />
