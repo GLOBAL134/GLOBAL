@@ -399,7 +399,7 @@ summary:focus-visible {
 @media (min-width: 1051px) {
   .travel-scene {
     top: -70px;
-    left: 20px;
+    left: -56px;
   }
 }
 .visa-deck img { display: block; width: 100%; height: auto; object-fit: contain; }
