@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
 import "./globals.css";
-import { countries, services } from "./site-data";
+import { countries, services, CONTACT_EMAIL } from "./site-data";
 
 const manrope = Manrope({ variable: "--font-manrope", subsets: ["cyrillic", "latin"] });
 
@@ -13,7 +13,7 @@ const structuredData = {
     "Сервисно-визовый центр в Новосибирске: консультации, оформление виз, медицинское страхование путешественников и нотариально заверенные переводы.",
   url: "https://svc-global.ru/",
   telephone: "+7 913 787-18-05",
-  email: "global.novosibirsk@mail.ru",
+  email: CONTACT_EMAIL,
   address: {
     "@type": "PostalAddress",
     addressLocality: "Новосибирск",

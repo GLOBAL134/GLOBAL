@@ -37,7 +37,7 @@ test('responsive chrome, country imagery and horizontal bounds', async () => {
           cards: cards.map((card) => ({ card: rect(card), image: rect(card.querySelector('img')) })),
           placeholderFlags: [...document.querySelectorAll('.country-directory .country-mini-flag')]
             .map((flag) => flag.textContent?.trim()).filter((flag) => flag === 'EU'),
-          heroParts: ['.travel-photo', '.passport-card', '.boarding-card'].map((selector) => ({ selector, rect: rect(document.querySelector(selector)) })),
+          heroParts: ['.visa-sheet', '.visa-emblem'].map((selector) => ({ selector, rect: rect(document.querySelector(selector)) })),
         };
       });
 
@@ -64,6 +64,51 @@ test('responsive chrome, country imagery and horizontal bounds', async () => {
       }
     });
   }
+});
+
+test('popular mosaic has five ordered cards with the intended desktop spans and mobile stack', async () => {
+  for (const width of widths) {
+    await withPage(width, async (page) => {
+      const cards = await page.locator('.visual-country').evaluateAll((elements) => elements.map((element) => ({
+        name: element.querySelector('h3')?.textContent,
+        x: element.getBoundingClientRect().x,
+        y: element.getBoundingClientRect().y,
+        w: element.getBoundingClientRect().width,
+        h: element.getBoundingClientRect().height,
+      })));
+      assert.deepEqual(cards.map((card) => card.name), ['Шенген', 'Великобритания', 'Япония', 'Китай', 'Южная Корея']);
+      if (width > 700) {
+        assert.ok(cards[0].h > cards[1].h * 1.8, `${width}px: Schengen must span both rows`);
+        assert.ok(cards[1].w > cards[2].w * 2.8, `${width}px: UK must span all three right columns`);
+        assert.ok(Math.abs(cards[2].w - cards[3].w) < 2 && Math.abs(cards[3].w - cards[4].w) < 2);
+        assert.ok(cards.slice(1).every((card) => card.x >= cards[0].x + cards[0].w));
+      } else {
+        assert.ok(cards.every((card, index) => index === 0 || card.y >= cards[index - 1].y + cards[index - 1].h));
+      }
+    });
+  }
+});
+
+test('contact channels, excerpt and selected calculator extras reach the real form without posting', async () => {
+  await withPage(390, async (page) => {
+    await page.locator('.burger').click();
+    assert.equal(await page.locator('.mobile-menu a[href^="https://t.me/"]').count(), 1);
+    assert.equal(await page.locator('.mobile-menu a[href^="https://max.ru/"]').count(), 1);
+    await page.locator('.mobile-menu button[aria-label="Закрыть"]').click();
+    assert.equal(await page.locator('.review-stage cite').innerText(), 'Анна Карпова');
+    assert.equal(await page.locator('.review-stage article a').getAttribute('href'), 'https://2gis.ru/reviews/141265770283147/review/212502268');
+    for (const extra of ['Бронирование авиабилетов', 'Бронирование отелей', 'Запись на подачу документов']) {
+      await page.locator(`.calculator fieldset input[value="${extra}"]`).check();
+    }
+    await page.locator('.calculator button').filter({ hasText: 'Получить точный расчёт' }).click();
+    const form = page.locator('.lead-modal form');
+    const comment = await form.locator('textarea[name="comment"]').inputValue();
+    for (const extra of ['Бронирование авиабилетов', 'Бронирование отелей', 'Запись на подачу документов']) {
+      assert.ok(comment.includes(extra), `Lost extra: ${extra}`);
+    }
+    assert.equal(await form.locator('select[name="service"]').inputValue(), 'Оформление виз');
+    assert.equal(await form.locator('input[name="consent"]').isChecked(), false);
+  });
 });
 
 test('mobile menu closes and unlocks the page after resizing to desktop', async () => {
@@ -113,7 +158,7 @@ test('motion is restrained, scroll-triggered and disabled for reduced motion', a
 
 test('country detail opens a prefilled consultation form without a second overlay', async () => {
   await withPage(1440, async (page) => {
-    await page.locator('.visual-country').first().click();
+    await page.locator('.visual-country').nth(2).click();
     const detail = page.getByRole('dialog');
     assert.equal(await detail.locator('.country-modal').count(), 1);
     await detail.getByRole('button', { name: 'Получить консультацию' }).click();
@@ -170,7 +215,7 @@ test('country directory keeps all 36 entries, removes the secondary search, and 
       });
       assert.equal(state.gap, 28, `${width}px: country cards need the standard heading gap`);
       assert.equal(state.heroSearch, 'Введите страну…', `${width}px: hero search was removed or changed`);
-      assert.equal(state.cards.length, 4, `${width}px: popular card count changed`);
+      assert.equal(state.cards.length, 5, `${width}px: popular card count changed`);
       for (const [index, card] of state.cards.entries()) {
         assert.ok(card.width > 0 && card.height > 0, `${width}px card ${index}: card has no clickable size`);
         assert.equal(card.cursor, 'pointer', `${width}px card ${index}: card is not clickable`);
@@ -187,11 +232,17 @@ test('country directory keeps all 36 entries, removes the secondary search, and 
         'Медицинское страхование путешественников',
         'Нотариально заверенный перевод',
         'Фото и копировальные услуги',
+        'Бронирование авиабилетов',
+        'Бронирование отелей',
+        'Запись на подачу документов',
       ]);
       await serviceSelect.selectOption('Медицинское страхование путешественников');
       assert.deepEqual(await extras.evaluateAll((inputs) => inputs.map((input) => input.value)), [
         'Нотариально заверенный перевод',
         'Фото и копировальные услуги',
+        'Бронирование авиабилетов',
+        'Бронирование отелей',
+        'Запись на подачу документов',
       ]);
 
       for (const card of await page.locator('.visual-country').all()) {
@@ -227,7 +278,7 @@ test('wizard uses a real country and service preset without posting', async () =
 
 test('Schengen aggregate requires a concrete country before opening the form', async () => {
   await withPage(1440, async (page) => {
-    await page.locator('.visual-country').nth(3).click();
+    await page.locator('.visual-country').first().click();
     const detail = page.locator('.country-modal');
     const cta = detail.getByRole('button', { name: 'Выбрать страну и получить консультацию' });
     assert.equal(await cta.isDisabled(), true);

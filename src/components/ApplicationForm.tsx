@@ -1,6 +1,6 @@
 import { FormEvent, useId, useState } from "react";
 import Link from "next/link";
-import { countries, services } from "../app/site-data";
+import { countries, primaryServices, TELEGRAM_URL } from "../app/site-data";
 
 export type LeadPreset = {
   country?: string;
@@ -84,11 +84,11 @@ export default function ApplicationForm({
           )}
           <a
             className="btn btn-outline"
-            href="https://wa.me/79137871805"
+            href={TELEGRAM_URL}
             target="_blank"
             rel="noreferrer"
           >
-            Написать в WhatsApp
+            Написать в Telegram
           </a>
         </div>
       </div>
@@ -167,7 +167,7 @@ export default function ApplicationForm({
           defaultValue={preset.service || ""}
         >
           <option value="">Выберите услугу</option>
-          {services.map((service) => (
+          {primaryServices.map((service) => (
             <option key={service.formName} value={service.formName}>
               {service.name}
             </option>

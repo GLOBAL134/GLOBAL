@@ -198,6 +198,8 @@ summary:focus-visible {
   align-items: center;
   gap: 14px;
 }
+.channel-icon { display:grid; place-items:center; width:32px; height:32px; border:1px solid currentColor; border-radius:50%; opacity:.85; flex:none; }
+.channel-icon svg { width:17px; height:17px; }
 .phone {
   font-weight: 800;
   font-size: 14px;
@@ -392,99 +394,22 @@ summary:focus-visible {
   max-width: 610px;
   margin-left: auto;
 }
-.travel-photo {
-  position: absolute;
-  right: 3%;
-  top: 20px;
-  width: 78%;
-  height: 455px;
-  border-radius: 180px 180px 30px 30px;
-  overflow: hidden;
-  transform: rotate(2deg);
-  box-shadow: 0 35px 80px rgba(0, 0, 0, 0.35);
-}
-.travel-photo img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 7s;
-}
-.travel-scene:hover .travel-photo img {
-  transform: scale(1.08);
-}
-.travel-photo:after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(transparent 55%, rgba(0, 0, 0, 0.55));
-}
-.travel-photo > span {
-  position: absolute;
-  z-index: 2;
-  left: 25px;
-  bottom: 22px;
-  font-size: 12px;
-  letter-spacing: 0.13em;
-}
-.passport-card {
-  position: absolute;
-  left: 1%;
-  top: 185px;
-  width: 205px;
-  height: 285px;
-  padding: 25px;
-  border-radius: 20px;
-  background: #1a4b3a;
-  transform: rotate(-10deg);
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
-  display: flex;
-  flex-direction: column;
-}
-.passport-card small {
-  letter-spacing: 0.15em;
-}
-.passport-card b {
-  margin-top: 10px;
-}
-.passport-card .global-emblem {
-  width: 108px;
-  height: 108px;
-  margin: auto;
-  filter: sepia(0.16) saturate(0.86);
-}
-.passport-card i {
-  font-size: 9px;
-  letter-spacing: 0.12em;
-}
-.boarding-card {
-  position: absolute;
-  right: 2%;
-  bottom: 22px;
-  width: 330px;
-  background: #f9f7ee;
-  color: var(--ink);
-  border-radius: 17px;
-  padding: 18px 22px;
-  transform: rotate(-3deg);
-  box-shadow: 0 20px 55px rgba(0, 0, 0, 0.28);
-}
-.boarding-card > div {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 29px;
-  margin: 8px 0;
-}
-.boarding-card svg {
-  width: 28px;
-  height: 28px;
-  fill: currentColor;
-}
-.boarding-card > span,
-.boarding-card > small {
-  font-size: 10px;
-  letter-spacing: 0.15em;
-}
+.visa-deck { isolation:isolate; }
+.visa-sheet { position:absolute; width:76%; height:73%; border-radius:26px; padding:36px; display:flex; flex-direction:column; box-shadow:0 35px 75px #0006; overflow:hidden; }
+.visa-sheet span,.visa-sheet small { font-size:11px; letter-spacing:.12em; text-transform:uppercase; }
+.visa-sheet b { font-size:clamp(32px,4vw,54px); letter-spacing:-.06em; line-height:1.05; }
+.visa-sheet-back { top:5%; right:5%; background:linear-gradient(145deg,#ddeb72,#93a957); color:#173628; transform:rotate(13deg); }
+.visa-sheet-back i { font-size:150px; font-style:normal; line-height:1.4; text-align:center; opacity:.35; }
+.visa-sheet-mid { top:12%; left:5%; background:linear-gradient(145deg,#e5e9d9,#faf8e9); color:#173628; transform:rotate(-12deg); }
+.visa-stamp { width:150px; height:150px; margin:auto; border:3px double #718c76; border-radius:50%; display:grid; place-items:center; text-align:center; transform:rotate(-17deg); font-size:15px; font-weight:900; letter-spacing:.11em; opacity:.64; }
+.visa-sheet-front { top:21%; right:9%; background:linear-gradient(150deg,#205743,#102f25); border:1px solid #819b6b; transform:rotate(3deg); }
+.visa-sheet-front b { margin:auto 0; }
+.visa-lines { display:grid; gap:10px; margin-bottom:25px; }
+.visa-lines i { display:block; height:1px; background:#a9c4a044; }
+.visa-lines i:nth-child(2) { width:70%; }
+.visa-lines i:nth-child(3) { width:45%; }
+.visa-emblem { position:absolute; z-index:3; right:0; bottom:1%; width:180px; height:145px; display:grid; place-items:center; filter:drop-shadow(0 15px 25px #0009); }
+.visa-emblem svg { width:100%; height:100%; transform:scaleX(1.1) rotate(-7deg); }
 .service-marquee {
   overflow: hidden;
   background: var(--acid);
@@ -681,7 +606,7 @@ summary:focus-visible {
 }
 .country-showcase {
   display: grid;
-  grid-template-columns: 1.3fr 0.7fr 0.7fr;
+  grid-template-columns: 1.25fr repeat(3, minmax(0, .38fr));
   grid-template-rows: 270px 270px;
   gap: 15px;
 }
@@ -699,9 +624,7 @@ summary:focus-visible {
 .vc-1 {
   grid-row: span 2;
 }
-.vc-4 {
-  grid-column: span 2;
-}
+.vc-2 { grid-column: span 3; }
 .visual-country img {
   position: absolute;
   inset: 0;
@@ -723,6 +646,9 @@ summary:focus-visible {
 .vc-4 img {
   object-position: 50% 56%;
 }
+.visual-country:not(.vc-1):not(.vc-2) h3 { font-size:clamp(17px,1.8vw,24px); overflow-wrap:anywhere; }
+.visual-country:not(.vc-1):not(.vc-2) p { font-size:12px; }
+.schengen-count { display:block; margin:5px 0; font-weight:800; }
 .visual-country:hover img {
   transform: scale(1.03);
 }
@@ -1128,6 +1054,7 @@ summary:focus-visible {
 .review-stage small {
   color: var(--muted);
 }
+.review-stage article a { display:inline-block; margin-top:12px; text-decoration:underline; font-size:13px; font-weight:700; }
 .review-links {
   display: grid;
   gap: 12px;
@@ -1604,6 +1531,7 @@ summary:focus-visible {
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.12em;
+  padding-right: 52px;
 }
 .wizard-progress {
   height: 5px;
@@ -1957,29 +1885,12 @@ summary:focus-visible {
   .travel-scene {
     height: 430px;
   }
-  .travel-photo {
-    width: 88%;
-    height: 330px;
-    border-radius: 110px 110px 24px 24px;
-  }
-  .passport-card {
-    width: 130px;
-    height: 190px;
-    padding: 16px;
-    top: 135px;
-  }
-  .passport-card .global-emblem {
-    width: 68px;
-    height: 68px;
-  }
-  .boarding-card {
-    width: 250px;
-    padding: 13px;
-    bottom: 0;
-  }
-  .boarding-card > div {
-    font-size: 20px;
-  }
+  .visa-sheet { padding:20px; height:73%; }
+  .visa-sheet-back { right:11%; transform:rotate(7deg); }
+  .visa-sheet-mid { left:11%; transform:rotate(-7deg); }
+  .visa-sheet span,.visa-sheet small { font-size:8px; }
+  .visa-stamp { width:100px; height:100px; font-size:10px; }
+  .visa-emblem { width:125px; height:105px; bottom:0; }
 
   .h2 {
     font-size: 43px;

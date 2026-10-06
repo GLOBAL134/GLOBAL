@@ -36,7 +36,7 @@ export function GlobalEmblem({ className = "" }: { className?: string }) {
           <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="#071a12" floodOpacity=".28" />
         </filter>
       </defs>
-      <circle cx="80" cy="80" r="74" fill="#f7f1d5" stroke="url(#global-blue)" strokeWidth="8" />
+      <ellipse cx="80" cy="80" rx="73" ry="65" fill="url(#global-blue)" stroke="#e2bb2d" strokeWidth="5" />
       <circle cx="80" cy="80" r="61" fill="none" stroke="#d1a91f" strokeWidth="2" />
       {[
         [80, 20], [112, 29], [134, 55], [140, 88], [125, 119], [96, 138],

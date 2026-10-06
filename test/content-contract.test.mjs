@@ -56,7 +56,7 @@ test("country groups stay 29 Schengen and 7 other destinations", () => {
 test("Schengen aggregate is popular-only and not a 37th country", () => {
   assert.equal(countries.some((country) => country.name === "Шенген"), false);
   assert.deepEqual(popularDestinations.map((destination) => destination.name), [
-    "Япония", "Южная Корея", "Китай", "Шенген",
+    "Шенген", "Великобритания", "Япония", "Китай", "Южная Корея",
   ]);
   assert.equal(popularDestinations.filter((destination) => destination.name === "Шенген").length, 1);
 });
@@ -92,13 +92,16 @@ test("calculator extras come from service form names and exclude the primary ser
       "Медицинское страхование путешественников",
       "Нотариально заверенный перевод",
       "Фото и копировальные услуги",
+      "Бронирование авиабилетов",
+      "Бронирование отелей",
+      "Запись на подачу документов",
     ],
   );
   assert.deepEqual(
     siteData.getApplicableExtras("Медицинское страхование путешественников").map(
       (service) => service.formName,
     ),
-    ["Нотариально заверенный перевод", "Фото и копировальные услуги"],
+    ["Нотариально заверенный перевод", "Фото и копировальные услуги", "Бронирование авиабилетов", "Бронирование отелей", "Запись на подачу документов"],
   );
 });
 

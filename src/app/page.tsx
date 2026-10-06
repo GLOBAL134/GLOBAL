@@ -14,6 +14,10 @@ import {
   reviews,
   SCHENGEN_COUNTRIES,
   services,
+  primaryServices,
+  CONTACT_EMAIL,
+  TELEGRAM_URL,
+  MAX_URL,
   getApplicableExtras,
   visaService,
   type PopularDestination,
@@ -28,7 +32,7 @@ const SvgIcon = ({
     | "phone"
     | "chat"
     | "visa"
-    | "passport"
+
     | "shield"
     | "copy"
     | "translate";
@@ -58,13 +62,7 @@ const SvgIcon = ({
         <path d="M7 9h4M7 13h7M16 9h1" />
       </>
     ),
-    passport: (
-      <>
-        <rect x="5" y="3" width="14" height="18" rx="2" />
-        <circle cx="12" cy="11" r="3" />
-        <path d="M9 11h6M12 8v6" />
-      </>
-    ),
+
     shield: (
       <>
         <path d="M12 3 20 6v5c0 5-3.4 8.2-8 10-4.6-1.8-8-5-8-10V6l8-3Z" />
@@ -310,6 +308,8 @@ export default function Home() {
             <a href="#contacts">Контакты</a>
           </nav>
           <div className="header-actions">
+            <a className="channel-icon" href={TELEGRAM_URL} target="_blank" rel="noreferrer" aria-label="Telegram GLOBAL" title="Telegram"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.6 3.5 18.3 20c-.2.9-.8 1.2-1.6.8l-5-3.7-2.4 2.3c-.3.3-.5.5-1 .5l.4-5.1 9.4-8.5c.4-.4-.1-.6-.6-.3L5.9 13.5.9 12c-1.1-.3-1.1-1 .2-1.5L20.5 3c.9-.3 1.4.2 1.1.5Z" /></svg></a>
+            <a className="channel-icon" href={MAX_URL} target="_blank" rel="noreferrer" aria-label="MAX GLOBAL" title="MAX"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 17V7l5 5 4-5 4 5 5-5v10"/><path d="M3 21h18"/></svg></a>
             <a className="phone" href="tel:+79137871805">
               {phone}
             </a>
@@ -363,9 +363,8 @@ export default function Home() {
         </nav>
         <div className="mobile-menu-actions">
           <a href="tel:+79137871805">{phone}</a>
-          <a href="https://wa.me/79137871805" target="_blank" rel="noreferrer">
-            WhatsApp
-          </a>
+          <a href={TELEGRAM_URL} target="_blank" rel="noreferrer">Telegram · @SVC_GLOBAL_NSK</a>
+          <a href={MAX_URL} target="_blank" rel="noreferrer">MAX · профиль GLOBAL</a>
           <button
             className="btn btn-primary"
             onClick={() => {
@@ -457,33 +456,17 @@ export default function Home() {
                 </span>
               </div>
             </div>
-            <div className="travel-scene">
-              <div className="travel-photo">
-                <img src={popularDestinations[0].image} alt="Токио" />
-                <span>Tokyo · Japan</span>
-              </div>
-              <div className="passport-card">
-                <small>GLOBAL</small>
-                <b>PASSPORT</b>
-                <GlobalEmblem />
-                <i>TRAVEL DOCUMENTS</i>
-              </div>
-              <div className="boarding-card">
-                <small>BOARDING PASS</small>
-                <div>
-                  <b>OVB</b>
-                  <SvgIcon type="plane" />
-                  <b>TYO</b>
-                </div>
-                <span>NOVOSIBIRSK · TOKYO</span>
-              </div>
-
+            <div className="visa-deck travel-scene" aria-label="Декоративная композиция документов GLOBAL">
+              <div className="visa-sheet visa-sheet-back" aria-hidden="true"><span>GLOBAL · DOCUMENT</span><i>✦</i><b>ENTRY</b><small>Консультация · Подготовка</small></div>
+              <div className="visa-sheet visa-sheet-mid" aria-hidden="true"><span>GLOBAL · TRAVEL</span><b>VISA</b><div className="visa-stamp">GLOBAL<br/>DOCUMENTS</div><small>Путешествия начинаются с подготовки</small></div>
+              <div className="visa-sheet visa-sheet-front" aria-hidden="true"><span>СЕРВИСНО-ВИЗОВЫЙ ЦЕНТР</span><b>Ваш путь<br/>к поездке</b><div className="visa-lines"><i/><i/><i/></div><small>Консультация · Документы · Поддержка</small></div>
+              <div className="visa-emblem"><GlobalEmblem /></div>
             </div>
           </div>
         </section>
         <div className="service-marquee">
           <div>
-            {[...services, ...services].map((s, i) => (
+            {[...primaryServices, ...primaryServices].map((s, i) => (
               <span key={i}>
                 {s.name}
                 <i>✦</i>
@@ -530,7 +513,7 @@ export default function Home() {
                 </div>
               </article>
               <div className="service-list">
-                {services.slice(1).map((s, i) => (
+                {primaryServices.slice(1).map((s, i) => (
                   <article key={s.name}>
                     <SvgIcon type={s.icon} />
                     <div>
@@ -574,9 +557,10 @@ export default function Home() {
                   <div>
                     <small>{c.group}</small>
                     <h3>{c.name}</h3>
+                    {"aggregate" in c && <span className="schengen-count">29 государств</span>}
                     <p>
                       {"aggregate" in c
-                        ? "Выберите конкретную страну"
+                        ? "Подготовка визовых документов"
                         : c.service || "Консультация по направлению"}
                     </p>
                     <b>Подробнее →</b>
@@ -670,7 +654,7 @@ export default function Home() {
                     setExtras([]);
                   }}
                 >
-                  {services.map((s) => (
+                  {primaryServices.map((s) => (
                     <option key={s.formName} value={s.formName}>
                       {s.name}
                     </option>
@@ -722,7 +706,7 @@ export default function Home() {
                     ? `${total.toLocaleString("ru-RU")} ₽`
                     : "Уточнит специалист"}
                 </strong>
-                <p>Сборы и дополнительные услуги рассчитываются отдельно.</p>
+                <p>Сборы рассчитываются отдельно. Стоимость дополнительных услуг уточнит специалист.</p>
               </div>
               <button
                 className="btn btn-dark"
@@ -807,7 +791,8 @@ export default function Home() {
                 <blockquote>«{reviews[reviewIndex].text}»</blockquote>
                 <div>
                   <cite>{reviews[reviewIndex].name}</cite>
-                  <small>{reviews[reviewIndex].date} · Яндекс Карты</small>
+                  <small>{reviews[reviewIndex].date && `${reviews[reviewIndex].date} · `}{reviews[reviewIndex].source} · Отрывок отзыва</small>
+                  <a href={reviews[reviewIndex].url} target="_blank" rel="noreferrer">Читать отзыв целиком ↗</a>
                 </div>
               </article>
               <div className="review-links">
@@ -885,7 +870,7 @@ export default function Home() {
                 ],
                 [
                   "Как записаться?",
-                  "Позвоните, напишите в WhatsApp либо заполните форму.",
+                  "Позвоните, напишите в Telegram или MAX либо заполните форму.",
                 ],
                 [
                   "Где находится офис?",
@@ -934,14 +919,18 @@ export default function Home() {
                 ["Адрес", "Новосибирск, ул. Челюскинцев, 15Б, 1 этаж"],
                 ["Режим работы", "Пн–Пт: 08:30–15:30"],
                 ["Телефон", phone],
-                ["Email", "global.novosibirsk@mail.ru"],
+                ["Email", CONTACT_EMAIL],
               ].map((x) => (
                 <div className="contact-row" key={x[0]}>
                   <span>{x[0]}</span>
-                  <b>{x[1]}</b>
+                  <b>{x[0] === "Email" ? <a href={`mailto:${CONTACT_EMAIL}`}>{x[1]}</a> : x[1]}</b>
                 </div>
               ))}
+              <div className="contact-row"><span>Telegram</span><b><a href={TELEGRAM_URL} target="_blank" rel="noreferrer">@SVC_GLOBAL_NSK ↗</a></b></div>
+              <div className="contact-row"><span>MAX</span><b><a href={MAX_URL} target="_blank" rel="noreferrer">Профиль GLOBAL ↗</a></b></div>
               <div className="contact-actions">
+                <a className="btn btn-ghost on-dark" href={TELEGRAM_URL} target="_blank" rel="noreferrer">Telegram</a>
+                <a className="btn btn-ghost on-dark" href={MAX_URL} target="_blank" rel="noreferrer">MAX</a>
                 <a
                   className="btn btn-primary"
                   href="https://yandex.ru/maps/?rtext=~55.039855,82.905859&rtt=auto"
@@ -985,9 +974,9 @@ export default function Home() {
           <div>
             <b>Связь</b>
             <a href="tel:+79137871805">{phone}</a>
-            <a href="mailto:global.novosibirsk@mail.ru">
-              global.novosibirsk@mail.ru
-            </a>
+            <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+            <a href={TELEGRAM_URL} target="_blank" rel="noreferrer">Telegram</a>
+            <a href={MAX_URL} target="_blank" rel="noreferrer">MAX</a>
           </div>
         </div>
         <div className="container footer-bottom">
@@ -1003,9 +992,9 @@ export default function Home() {
           <SvgIcon type="phone" />
           Позвонить
         </a>
-        <a href="https://wa.me/79137871805">
+        <a href={TELEGRAM_URL} target="_blank" rel="noreferrer">
           <SvgIcon type="chat" />
-          Написать
+          Telegram
         </a>
         <button onClick={() => openLead({ source: "mobile-bar" })}>
           <SvgIcon type="plane" />
@@ -1191,7 +1180,7 @@ export default function Home() {
             <div className="wizard-body">
               {wizardStep === 1 && (
                 <div className="wizard-step">
-                  <small>01 · Направление</small>
+
                   <h2>Куда вы едете?</h2>
                   <input
                     aria-label="Страна поездки"
@@ -1211,7 +1200,7 @@ export default function Home() {
               )}
               {wizardStep === 2 && (
                 <div className="wizard-step">
-                  <small>02 · Цель</small>
+
                   <h2>Цель поездки?</h2>
                   <div className="choice-grid">
                     {["Туризм", "Бизнес", "Учёба", "Гости", "Другое"].map(
@@ -1230,7 +1219,7 @@ export default function Home() {
               )}
               {wizardStep === 3 && (
                 <div className="wizard-step">
-                  <small>03 · Дата</small>
+
                   <h2>Когда планируете поездку?</h2>
                   <input
                     aria-label="Месяц поездки"
@@ -1244,7 +1233,7 @@ export default function Home() {
               )}
               {wizardStep === 4 && (
                 <div className="wizard-step">
-                  <small>04 · Путешественники</small>
+
                   <h2>Сколько человек едет?</h2>
                   <div className="wizard-counter">
                     <button
@@ -1275,7 +1264,7 @@ export default function Home() {
               )}
               {wizardStep === 5 && (
                 <div className="wizard-step">
-                  <small>05 · Загранпаспорт</small>
+
                   <h2>Есть действующий загранпаспорт?</h2>
                   <div className="choice-grid two">
                     {["Да", "Нет"].map((x) => (

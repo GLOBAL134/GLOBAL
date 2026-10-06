@@ -16,6 +16,7 @@ export type Service = {
   detailTitle?: string;
   detailDescription?: string;
   insurers?: string[];
+  extraOnly?: true;
   icon: "visa" | "shield" | "copy" | "translate";
 };
 
@@ -32,6 +33,9 @@ export type PopularDestination = Country | AggregateDestination;
 
 export const NEUTRAL_COUNTRY_SUMMARY =
   "Условия оформления зависят от цели поездки и ситуации заявителя. Оставьте заявку — специалист GLOBAL проконсультирует по вашему случаю.";
+export const CONTACT_EMAIL = "n9137871805@yandex.ru";
+export const TELEGRAM_URL = "https://t.me/SVC_GLOBAL_NSK";
+export const MAX_URL = "https://max.ru/u/f9LHodD0cOL9XCvB0s54oOa-5DtER3blB5RfJKiYU-tE9NGhkphplmudTYk";
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
@@ -174,6 +178,7 @@ export const countries: Country[] = [
     name: "Великобритания",
     flag: countryFlags["Великобритания"],
     group: "Другие направления",
+    image: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=1400&q=82",
     summary: NEUTRAL_COUNTRY_SUMMARY,
   },
 ];
@@ -200,10 +205,11 @@ export const schengenAggregate: AggregateDestination = {
 };
 
 export const popularDestinations: PopularDestination[] = [
-  countries.find((country) => country.name === "Япония")!,
-  countries.find((country) => country.name === "Южная Корея")!,
-  countries.find((country) => country.name === "Китай")!,
   schengenAggregate,
+  countries.find((country) => country.name === "Великобритания")!,
+  countries.find((country) => country.name === "Япония")!,
+  countries.find((country) => country.name === "Китай")!,
+  countries.find((country) => country.name === "Южная Корея")!,
 ];
 
 export const services: Service[] = [
@@ -239,33 +245,55 @@ export const services: Service[] = [
     description: "Фото на документы и копировальные услуги в офисе GLOBAL.",
     icon: "copy",
   },
+  ...["Бронирование авиабилетов", "Бронирование отелей", "Запись на подачу документов"].map((name): Service => ({
+    name,
+    formName: name,
+    description: "Условия и стоимость уточнит специалист.",
+    icon: "visa",
+    extraOnly: true,
+  })),
 ];
 
-export const visaService = services.find((service) => service.icon === "visa")!;
+export const primaryServices = services.filter((service) => !service.extraOnly);
+export const visaService = primaryServices[0];
 
 export const getApplicableExtras = (primaryServiceFormName: string) =>
   services.filter(
     (service) =>
-      service.icon !== "visa" && service.formName !== primaryServiceFormName,
+      service !== visaService && service.formName !== primaryServiceFormName,
   );
 
 export const reviews = [
+  {
+    name: "Анна Карпова",
+    date: "",
+    text: "Благодарю менеджера, Николая, за профессиональную, качественную и очень полезную информацию по получению шенгенской визы и организации поездки!!!",
+    rating: 5,
+    source: "2ГИС",
+    url: "https://2gis.ru/reviews/141265770283147/review/212502268",
+  },
   {
     name: "Инна М.",
     date: "27 мая 2025",
     text: "Хочу сказать слова благодарности специалисту по работе с визами Великобритании, Варваре. Свою работу знает отлично, очень внимательная и доброжелательная.",
     rating: 5,
+    source: "Яндекс Карты",
+    url: "https://yandex.ru/maps/org/global/1780859090/reviews/",
   },
   {
     name: "Ольга Шлосс",
     date: "28 августа 2025",
     text: "Дочь обращалась и осталась недовольна качеством обслуживания. По мнению автора, сделку не сопровождали и не сообщили об изменениях в требованиях.",
     rating: 2,
+    source: "Яндекс Карты",
+    url: "https://yandex.ru/maps/org/global/1780859090/reviews/",
   },
   {
     name: "Ярик Яроки",
     date: "3 марта 2026",
     text: "Отличный центр. Персонал приятен в общении и отвечает на вопросы. Остался очень доволен.",
     rating: 5,
+    source: "Яндекс Карты",
+    url: "https://yandex.ru/maps/org/global/1780859090/reviews/",
   },
 ];
