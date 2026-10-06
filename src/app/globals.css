@@ -396,6 +396,12 @@ summary:focus-visible {
   max-width: 610px;
   margin: auto;
 }
+@media (min-width: 1051px) {
+  .travel-scene {
+    top: -70px;
+    left: 20px;
+  }
+}
 .visa-deck img { display: block; width: 100%; height: auto; object-fit: contain; }
 .service-marquee {
   overflow: hidden;
@@ -440,10 +446,24 @@ summary:focus-visible {
 .services-section .section-heading.split > p {
   margin-top: 10px;
 }
+.services-section {
+  --service-columns: 1.05fr 0.95fr;
+  --service-gap: 18px;
+  --service-pad: 24px;
+  --service-icon: 52px;
+  --service-icon-gap: 14px;
+}
+.services-section .section-heading.split {
+  grid-template-columns: var(--service-columns);
+  gap: var(--service-gap);
+}
+.services-section .section-heading.split > p {
+  margin-left: calc(var(--service-pad) + var(--service-icon) + var(--service-icon-gap));
+}
 .service-editorial {
   display: grid;
-  grid-template-columns: 1.05fr 0.95fr;
-  gap: 18px;
+  grid-template-columns: var(--service-columns);
+  gap: var(--service-gap);
 }
 .service-feature {
   min-width: 0;
@@ -504,11 +524,6 @@ summary:focus-visible {
   color: #bed0c7;
   line-height: 1.65;
 }
-.service-number {
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  color: #a9bdb4;
-}
 .inline-actions {
   display: flex;
   gap: 12px;
@@ -542,10 +557,10 @@ summary:focus-visible {
   min-width: 0;
   background: white;
   border-radius: 24px;
-  padding: 28px 24px 24px;
+  padding: 28px var(--service-pad) 24px;
   display: grid;
-  grid-template-columns: 52px minmax(0, 1fr);
-  gap: 14px;
+  grid-template-columns: var(--service-icon) minmax(0, 1fr);
+  gap: var(--service-icon-gap);
   align-items: center;
   transition: 0.25s;
 }
@@ -1185,14 +1200,35 @@ summary:focus-visible {
   letter-spacing: -0.06em;
   margin: 15px 0;
 }
-.lead-grid > div > p,
-.lead-grid li {
+.lead-grid .lead-intro {
+  font-size: 18px;
+  line-height: 1.5;
+  margin: 24px 0 12px;
+  max-width: 440px;
+}
+.lead-grid .lead-support {
   color: #bcd0c6;
   line-height: 1.7;
+  max-width: 440px;
+  margin: 0;
 }
-.lead-grid ul {
-  padding-left: 20px;
+.lead-grid .trust-list {
+  list-style: none;
+  padding: 0;
+  margin: 30px 0 0;
+  display: grid;
+  gap: 18px;
+  max-width: 440px;
 }
+.trust-list li {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  line-height: 1.55;
+  font-weight: 650;
+}
+.trust-list svg { width: 24px; height: 24px; color: var(--acid); }
 .form {
   background: white;
   color: var(--ink);
@@ -1745,6 +1781,13 @@ summary:focus-visible {
   .section-heading.split {
     grid-template-columns: 1fr;
     gap: 20px;
+  }
+  .services-section .section-heading.split {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .services-section .section-heading.split > p {
+    margin-left: 0;
   }
   .country-directory {
     grid-template-columns: repeat(3, 1fr);

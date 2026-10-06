@@ -95,7 +95,7 @@ test('FAQ, calculator copy, trust copy and review links match the point-fix cont
     const contract = await page.evaluate(() => ({
       faqMarginTop: getComputedStyle(document.querySelector('.faq-grid .btn')).marginTop,
       calculator: document.querySelector('.calculator > div:first-child p')?.textContent.trim(),
-      trustMessage: document.querySelector('.lead-grid > div > p')?.textContent.replace(/\s+/g, ' ').trim(),
+      trustMessages: [...document.querySelectorAll('.lead-grid > div > p')].map(x => x.textContent.replace(/\s+/g, ' ').trim()),
       trust: document.querySelector('.lead-section')?.innerText,
       reviewLinks: [...document.querySelectorAll('.review-links a')].map((link) => {
         const style = getComputedStyle(link);
@@ -116,9 +116,9 @@ test('FAQ, calculator copy, trust copy and review links match the point-fix cont
       contract.calculator,
       'Показываем стоимость только в тех случаях, когда стоимость услуги GLOBAL подтверждена и опубликована.',
     );
-    assert.equal(
-      contract.trustMessage,
-      'После отправки заявка поступит специалисту GLOBAL. Мы свяжемся с вами, уточним детали поездки и подскажем дальнейшие шаги.',
+    assert.deepEqual(
+      contract.trustMessages,
+      ['После отправки заявка поступит специалисту GLOBAL.', 'Мы свяжемся с вами, уточним детали поездки и подскажем дальнейшие шаги.'],
     );
     assert.match(contract.trust, /Персональная консультация/);
     assert.match(contract.trust, /Уникальный номер каждой заявки/);

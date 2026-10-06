@@ -497,7 +497,6 @@ export default function Home() {
                   </div>
                 </div>
                 <div>
-                  <span className="service-number">01</span>
                   <SvgIcon type="visa" />
                   <h3>{services[0].name}</h3>
                   <p>{services[0].description}</p>
@@ -891,14 +890,12 @@ export default function Home() {
             <div>
               <div className="eyebrow light">Начните с консультации</div>
               <h2>Расскажите о вашей поездке</h2>
-              <p>
-                После отправки заявка поступит специалисту GLOBAL. Мы свяжемся
-                с вами, уточним детали поездки и подскажем дальнейшие шаги.
-              </p>
-              <ul>
-                <li>Персональная консультация</li>
-                <li>Уникальный номер каждой заявки</li>
-                <li>Контактные данные используются только для связи по вашей заявке</li>
+              <p className="lead-intro">После отправки заявка поступит специалисту GLOBAL.</p>
+              <p className="lead-support">Мы свяжемся с вами, уточним детали поездки и подскажем дальнейшие шаги.</p>
+              <ul className="trust-list">
+                <li><SvgIcon type="chat" /><span>Персональная консультация</span></li>
+                <li><SvgIcon type="visa" /><span>Уникальный номер каждой заявки</span></li>
+                <li><SvgIcon type="shield" /><span>Контактные данные используются только для связи по вашей заявке</span></li>
               </ul>
             </div>
             <ApplicationForm preset={{ source: "website-main" }} />

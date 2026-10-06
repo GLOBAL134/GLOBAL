@@ -109,7 +109,7 @@ test('service, countries, wizard and trust point fixes keep scoped spacing and e
           countrySubtitleMargin: getComputedStyle(countryP).marginTop,
           wizardGapOne: gap(promoH2, promoP),
           wizardGapTwo: gap(promoP, promoButton),
-          trustMessage: document.querySelector('.lead-grid > div > p')?.textContent.replace(/\s+/g, ' ').trim(),
+          trustMessages: [...document.querySelectorAll('.lead-grid > div > p')].map(x => x.textContent.replace(/\s+/g, ' ').trim()),
           trustItems: [...document.querySelectorAll('.lead-grid > div > ul li')].map((x) => x.textContent.trim()),
         };
       });
@@ -128,9 +128,9 @@ test('service, countries, wizard and trust point fixes keep scoped spacing and e
       assert.equal(state.countrySubtitleMargin, '10px', `${viewport.width}px: countries subtitle margin should be small`);
       assert.ok(Math.abs(pixels(state.wizardGapOne) - pixels(state.wizardGapTwo)) <= 2, `${viewport.width}px: wizard intro gaps are uneven`);
       assert.ok(pixels(state.wizardGapOne) >= 12 && pixels(state.wizardGapOne) <= 24, `${viewport.width}px: wizard gap is not restrained`);
-      assert.equal(
-        state.trustMessage,
-        'После отправки заявка поступит специалисту GLOBAL. Мы свяжемся с вами, уточним детали поездки и подскажем дальнейшие шаги.',
+      assert.deepEqual(
+        state.trustMessages,
+        ['После отправки заявка поступит специалисту GLOBAL.', 'Мы свяжемся с вами, уточним детали поездки и подскажем дальнейшие шаги.'],
       );
       assert.deepEqual(state.trustItems, [
         'Персональная консультация',
