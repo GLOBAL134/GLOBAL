@@ -33,10 +33,10 @@ test('one contact source replaces all old email references and preserves the con
   assert.match(page, /MAX_URL/);
 });
 
-test('hero has a fictional visa deck instead of the Tokyo scene or boarding card', () => {
+test('hero uses the approved single collage without the generated deck or duplicate emblem', () => {
   assert.match(page, /className="visa-deck travel-scene"/);
-  assert.match(page, /<GlobalEmblem/);
-  assert.doesNotMatch(page, /travel-photo|passport-card|boarding-card|BOARDING PASS|OVB|TYO/);
+  assert.match(page, /src=\{`\$\{process\.env\.NEXT_PUBLIC_BASE_PATH \|\| ""\}\/images\/global-visa-collage\.webp`\}/);
+  assert.doesNotMatch(page, /<GlobalEmblem|visa-sheet|visa-emblem|visa-stamp|visa-lines|travel-photo|passport-card|boarding-card|BOARDING PASS|OVB|TYO/);
 });
 
 test('only four original services are primary and extras stay in the shared catalog', () => {

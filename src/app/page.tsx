@@ -5,7 +5,7 @@ import Link from "next/link";
 import ApplicationForm, {
   type LeadPreset,
 } from "../components/ApplicationForm";
-import { GlobalEmblem, GlobalLogo } from "../components/Brand";
+import { GlobalLogo } from "../components/Brand";
 import {
   countries,
   countryGroups,
@@ -457,10 +457,7 @@ export default function Home() {
               </div>
             </div>
             <div className="visa-deck travel-scene" aria-label="Декоративная композиция документов GLOBAL">
-              <div className="visa-sheet visa-sheet-back" aria-hidden="true"><span>GLOBAL · DOCUMENT</span><i>✦</i><b>ENTRY</b><small>Консультация · Подготовка</small></div>
-              <div className="visa-sheet visa-sheet-mid" aria-hidden="true"><span>GLOBAL · TRAVEL</span><b>VISA</b><div className="visa-stamp">GLOBAL<br/>DOCUMENTS</div><small>Путешествия начинаются с подготовки</small></div>
-              <div className="visa-sheet visa-sheet-front" aria-hidden="true"><span>СЕРВИСНО-ВИЗОВЫЙ ЦЕНТР</span><b>Ваш путь<br/>к поездке</b><div className="visa-lines"><i/><i/><i/></div><small>Консультация · Документы · Поддержка</small></div>
-              <div className="visa-emblem"><GlobalEmblem /></div>
+              <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/images/global-visa-collage.webp`} width="1536" height="1024" alt="" />
             </div>
           </div>
         </section>

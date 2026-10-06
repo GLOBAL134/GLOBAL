@@ -37,7 +37,13 @@ test('responsive chrome, country imagery and horizontal bounds', async () => {
           cards: cards.map((card) => ({ card: rect(card), image: rect(card.querySelector('img')) })),
           placeholderFlags: [...document.querySelectorAll('.country-directory .country-mini-flag')]
             .map((flag) => flag.textContent?.trim()).filter((flag) => flag === 'EU'),
-          heroParts: ['.visa-sheet', '.visa-emblem'].map((selector) => ({ selector, rect: rect(document.querySelector(selector)) })),
+          collage: (() => {
+            const deck = document.querySelector('.hero .visa-deck');
+            const image = deck?.querySelector('img');
+            return { deck: rect(deck), image: rect(image), src: image?.currentSrc, loaded: image?.complete && image.naturalWidth === 1536 && image.naturalHeight === 1024,
+              fit: image && getComputedStyle(image).objectFit, pieces: deck?.children.length,
+              copy: rect(document.querySelector('.hero-copy')), emblem: deck?.querySelector('svg') };
+          })(),
         };
       });
 
@@ -58,10 +64,15 @@ test('responsive chrome, country imagery and horizontal bounds', async () => {
         assert.ok(Math.abs(item.image.width - item.card.width) <= 1, `${width}px card ${index}: image width mismatch`);
         assert.ok(Math.abs(item.image.height - item.card.height) <= 1, `${width}px card ${index}: image height mismatch`);
       }
-      for (const part of result.heroParts) {
-        if (!part.rect) continue;
-        assert.ok(part.rect.left >= -1 && part.rect.right <= width + 1, `${width}px: ${part.selector} leaves viewport`);
-      }
+      const { collage } = result;
+      assert.ok(collage.loaded, `${width}px: approved collage missing or dimensions changed`);
+      assert.match(collage.src, /\/site-GLOBAL\/images\/global-visa-collage\.webp$/);
+      assert.equal(collage.fit, 'contain');
+      assert.equal(collage.pieces, 1, `${width}px: old deck still present`);
+      assert.equal(collage.emblem, null, `${width}px: duplicate emblem`);
+      assert.ok(collage.image.left >= -1 && collage.image.right <= width + 1, `${width}px: collage leaves viewport`);
+      assert.ok(Math.abs((collage.image.left + collage.image.right - collage.deck.left - collage.deck.right) / 2) < 2, `${width}px: collage not centered`);
+      if (width <= 1050) assert.ok(collage.image.top >= collage.copy.bottom - 1, `${width}px: collage not below copy`);
     });
   }
 });
