@@ -51,8 +51,9 @@ test('services, decorative index, trust and hero stay responsive', async () => {
         if (width > 1050) {
           assert.ok(Math.abs(state.paragraph.left - state.insurance.left) <= 2, `${width}: intro ${state.paragraph.left} vs insurance ${state.insurance.left}`);
           assert.equal(state.sceneTop, '-70px', `${width}: desktop hero not lifted`);
-          assert.equal(state.sceneLeft, '-56px', `${width}: desktop hero not shifted left`);
-          assert.ok(Math.abs(state.scene.right - state.heroGrid.right + 56) <= 2, `${width}: desktop collage has wrong displacement`);
+          const expectedShift = Math.min(133, width - state.heroGrid.right - 16);
+          assert.ok(Math.abs(parseFloat(state.sceneLeft) - expectedShift) <= 2, `${width}: desktop hero not responsively shifted right`);
+          assert.ok(Math.abs(state.scene.right - state.heroGrid.right - expectedShift) <= 2, `${width}: desktop collage has wrong displacement`);
         } else {
           assert.ok(Math.abs(state.paragraph.left - state.container.left) <= 2, `${width}: stacked intro not container-aligned`);
           assert.equal(state.sceneTop, '0px', `${width}: mobile hero vertical shift`);
