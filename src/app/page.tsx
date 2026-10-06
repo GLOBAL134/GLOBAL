@@ -309,7 +309,7 @@ export default function Home() {
           </nav>
           <div className="header-actions">
             <a className="channel-icon" href={TELEGRAM_URL} target="_blank" rel="noreferrer" aria-label="Telegram GLOBAL" title="Telegram"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.6 3.5 18.3 20c-.2.9-.8 1.2-1.6.8l-5-3.7-2.4 2.3c-.3.3-.5.5-1 .5l.4-5.1 9.4-8.5c.4-.4-.1-.6-.6-.3L5.9 13.5.9 12c-1.1-.3-1.1-1 .2-1.5L20.5 3c.9-.3 1.4.2 1.1.5Z" /></svg></a>
-            <a className="channel-icon" href={MAX_URL} target="_blank" rel="noreferrer" aria-label="MAX GLOBAL" title="MAX"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 17V7l5 5 4-5 4 5 5-5v10"/><path d="M3 21h18"/></svg></a>
+            <a className="channel-icon channel-icon-max" href={MAX_URL} target="_blank" rel="noreferrer" aria-label="MAX GLOBAL" title="MAX"><img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/images/max-icon.webp`} width="32" height="32" alt="" aria-hidden="true" /></a>
             <a className="phone" href="tel:+79137871805">
               {phone}
             </a>

@@ -7,6 +7,11 @@ const source = (file) => readFileSync(new URL(`../src/${file}`, import.meta.url)
 const page = source('app/page.tsx');
 const form = source('components/ApplicationForm.tsx');
 
+test('MAX header uses the supplied image without replacing the Telegram icon', () => {
+  assert.match(page, /className="channel-icon channel-icon-max"[\s\S]*?aria-label="MAX GLOBAL"[\s\S]*?<img src=\{`\$\{process.env.NEXT_PUBLIC_BASE_PATH \|\| ""\}\/images\/max-icon.webp`\}/);
+  assert.match(page, /aria-label="Telegram GLOBAL"[^>]*><svg/);
+});
+
 test('the main review is a sourced short 2GIS excerpt', () => {
   const review = reviews[0];
   assert.equal(review.name, 'Анна Карпова');

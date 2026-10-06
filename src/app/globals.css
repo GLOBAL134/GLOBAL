@@ -200,6 +200,8 @@ summary:focus-visible {
 }
 .channel-icon { display:grid; place-items:center; width:32px; height:32px; border:1px solid currentColor; border-radius:50%; opacity:.85; flex:none; }
 .channel-icon svg { width:17px; height:17px; }
+.channel-icon-max { border:0; opacity:1; overflow:hidden; }
+.channel-icon-max img { display:block; width:100%; height:100%; object-fit:cover; }
 .phone {
   font-weight: 800;
   font-size: 14px;
