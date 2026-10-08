@@ -34,6 +34,7 @@ export type PopularDestination = Country | AggregateDestination;
 export const NEUTRAL_COUNTRY_SUMMARY =
   "Условия оформления зависят от цели поездки и ситуации заявителя. Оставьте заявку — специалист GLOBAL проконсультирует по вашему случаю.";
 export const CONTACT_EMAIL = "n9137871805@yandex.ru";
+export const WHATSAPP_URL = "https://wa.me/79137871805";
 export const TELEGRAM_URL = "https://t.me/SVC_GLOBAL_NSK";
 export const MAX_URL = "https://max.ru/u/f9LHodD0cOL9XCvB0s54oOa-5DtER3blB5RfJKiYU-tE9NGhkphplmudTYk";
 

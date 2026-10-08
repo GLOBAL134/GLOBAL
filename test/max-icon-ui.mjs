@@ -10,19 +10,22 @@ try {
     for (const scrollY of [0, 1200]) {
       await page.evaluate(y => window.scrollTo(0, y), scrollY);
       await page.waitForTimeout(600);
-      const telegram = page.locator('a[aria-label="Telegram GLOBAL"]');
-      const max = page.locator('a[aria-label="MAX GLOBAL"]');
-      const art = max.locator('.max-icon-art');
-      const color = await telegram.evaluate(e => getComputedStyle(e).color);
-      assert.equal(await art.evaluate(e => getComputedStyle(e).backgroundColor), color);
-      assert.equal(await max.evaluate(e => getComputedStyle(e).opacity), await telegram.evaluate(e => getComputedStyle(e).opacity));
-      assert.match(await art.evaluate(e => getComputedStyle(e).maskImage), /\/site-GLOBAL\/images\/max-icon.webp/);
-      assert.ok(await max.locator('img').evaluate(e => e.complete && e.naturalWidth === 128));
-      const t = await telegram.boundingBox(), m = await max.boundingBox();
-      assert.ok(t && m); assert.equal(t.width, m.width); assert.equal(t.height, m.height);
-      assert.equal(m.width, 32);
-      if (width === 1440) await page.locator('.header-actions').screenshot({ path: `/Users/grizzly/GLOBAL-qa/oct6-production/max-color-${scrollY ? 'light' : 'dark'}.png` });
-      console.log(`${width}px ${scrollY ? 'light' : 'dark'}: matching color ${color}, opacity and 32px diameter`);
+      const telegram = page.locator('.header-actions a[aria-label="Открыть Telegram GLOBAL"]');
+      const max = page.locator('.header-actions a[aria-label="Открыть MAX GLOBAL"]');
+      const whatsapp = page.locator('.header-actions a[aria-label="Открыть WhatsApp GLOBAL"]');
+      for (const icon of [max, whatsapp]) {
+        const img = icon.locator('img');
+        assert.ok(await img.evaluate(e => e.complete && e.naturalWidth > 0));
+        assert.equal(await img.evaluate(e => getComputedStyle(e).maskImage), 'none');
+        assert.equal(await img.evaluate(e => getComputedStyle(e).filter), 'none');
+        assert.equal(await img.evaluate(e => getComputedStyle(e).opacity), '1');
+        const t = await telegram.boundingBox(), m = await icon.boundingBox();
+        assert.ok(t && m); assert.equal(t.width, m.width); assert.equal(t.height, m.height);
+        assert.equal(m.width, 32);
+      }
+      assert.match(await max.locator('img').getAttribute('src'), /\/site-GLOBAL\/images\/max-colored\.svg/);
+      assert.match(await whatsapp.locator('img').getAttribute('src'), /\/site-GLOBAL\/images\/whatsapp-white\.svg/);
+      console.log(`${width}px ${scrollY ? 'light' : 'dark'}: full-color assets visible at 32px`);
     }
     await page.close();
   }

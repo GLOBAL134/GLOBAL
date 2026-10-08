@@ -18,10 +18,23 @@ import {
   CONTACT_EMAIL,
   TELEGRAM_URL,
   MAX_URL,
+  WHATSAPP_URL,
   getApplicableExtras,
   visaService,
   type PopularDestination,
 } from "./site-data";
+
+const SocialContactIcon = ({ type }: { type: "Telegram" | "MAX" | "WhatsApp" }) => {
+  if (type === "Telegram") return <svg viewBox="0 0 24 24" fill="white" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#2AABEE" /><path d="M21.6 3.5 18.3 20c-.2.9-.8 1.2-1.6.8l-5-3.7-2.4 2.3c-.3.3-.5.5-1 .5l.4-5.1 9.4-8.5c.4-.4-.1-.6-.6-.3L5.9 13.5.9 12c-1.1-.3-1.1-1 .2-1.5L20.5 3c.9-.3 1.4.2 1.1.5Z" transform="translate(3 3) scale(.75)" /></svg>;
+  const src = `${process.env.NEXT_PUBLIC_BASE_PATH || ""}/images/${type === "MAX" ? "max-colored.svg" : "whatsapp-white.svg"}`;
+  return type === "MAX" ? <img src={src} width="32" height="32" alt="" aria-hidden="true" /> : <span className="whatsapp-icon"><img src={src} width="32" height="32" alt="" aria-hidden="true" /></span>;
+};
+
+const SocialContactLink = ({ type, className = "", children }: { type: "Telegram" | "MAX" | "WhatsApp"; className?: string; children?: React.ReactNode }) => (
+  <a className={className} href={type === "Telegram" ? TELEGRAM_URL : type === "MAX" ? MAX_URL : WHATSAPP_URL} target="_blank" rel="noreferrer" aria-label={`Открыть ${type} GLOBAL`} title={type}>
+    <SocialContactIcon type={type} />{children}
+  </a>
+);
 
 const SvgIcon = ({
   type,
@@ -308,8 +321,9 @@ export default function Home() {
             <a href="#contacts">Контакты</a>
           </nav>
           <div className="header-actions">
-            <a className="channel-icon" href={TELEGRAM_URL} target="_blank" rel="noreferrer" aria-label="Telegram GLOBAL" title="Telegram"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.6 3.5 18.3 20c-.2.9-.8 1.2-1.6.8l-5-3.7-2.4 2.3c-.3.3-.5.5-1 .5l.4-5.1 9.4-8.5c.4-.4-.1-.6-.6-.3L5.9 13.5.9 12c-1.1-.3-1.1-1 .2-1.5L20.5 3c.9-.3 1.4.2 1.1.5Z" /></svg></a>
-            <a className="channel-icon channel-icon-max" href={MAX_URL} target="_blank" rel="noreferrer" aria-label="MAX GLOBAL" title="MAX"><span className="max-icon-art" style={{ maskImage: `url(${process.env.NEXT_PUBLIC_BASE_PATH || ""}/images/max-icon.webp)`, WebkitMaskImage: `url(${process.env.NEXT_PUBLIC_BASE_PATH || ""}/images/max-icon.webp)` }} aria-hidden="true"><img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/images/max-icon.webp`} width="32" height="32" alt="" aria-hidden="true" /></span></a>
+            <SocialContactLink type="Telegram" className="channel-icon" />
+            <SocialContactLink type="MAX" className="channel-icon" />
+            <SocialContactLink type="WhatsApp" className="channel-icon" />
             <a className="phone" href="tel:+79137871805">
               {phone}
             </a>
@@ -362,9 +376,10 @@ export default function Home() {
           ))}
         </nav>
         <div className="mobile-menu-actions">
-          <a href="tel:+79137871805">{phone}</a>
-          <a href={TELEGRAM_URL} target="_blank" rel="noreferrer">Telegram · @SVC_GLOBAL_NSK</a>
-          <a href={MAX_URL} target="_blank" rel="noreferrer">MAX · профиль GLOBAL</a>
+          <a href="tel:+791****1805">{phone}</a>
+          <SocialContactLink type="Telegram"><span>Telegram · @SVC_GLOBAL_NSK</span></SocialContactLink>
+          <SocialContactLink type="MAX"><span>MAX · профиль GLOBAL</span></SocialContactLink>
+          <SocialContactLink type="WhatsApp"><span>WhatsApp</span></SocialContactLink>
           <button
             className="btn btn-primary"
             onClick={() => {
@@ -920,11 +935,13 @@ export default function Home() {
                   <b>{x[0] === "Email" ? <a href={`mailto:${CONTACT_EMAIL}`}>{x[1]}</a> : x[1]}</b>
                 </div>
               ))}
-              <div className="contact-row"><span>Telegram</span><b><a href={TELEGRAM_URL} target="_blank" rel="noreferrer">@SVC_GLOBAL_NSK ↗</a></b></div>
-              <div className="contact-row"><span>MAX</span><b><a href={MAX_URL} target="_blank" rel="noreferrer">Профиль GLOBAL ↗</a></b></div>
+              <div className="contact-row"><span>Telegram</span><b><SocialContactLink type="Telegram"><span>@SVC_GLOBAL_NSK ↗</span></SocialContactLink></b></div>
+              <div className="contact-row"><span>MAX</span><b><SocialContactLink type="MAX"><span>Профиль GLOBAL ↗</span></SocialContactLink></b></div>
+              <div className="contact-row"><span>WhatsApp</span><b><SocialContactLink type="WhatsApp"><span>Написать ↗</span></SocialContactLink></b></div>
               <div className="contact-actions">
-                <a className="btn btn-ghost on-dark" href={TELEGRAM_URL} target="_blank" rel="noreferrer">Telegram</a>
-                <a className="btn btn-ghost on-dark" href={MAX_URL} target="_blank" rel="noreferrer">MAX</a>
+                <SocialContactLink type="Telegram" className="btn btn-ghost on-dark"><span className="action-label">Telegram</span></SocialContactLink>
+                <SocialContactLink type="MAX" className="btn btn-ghost on-dark"><span className="action-label">MAX</span></SocialContactLink>
+                <SocialContactLink type="WhatsApp" className="btn btn-ghost on-dark"><span className="action-label">WhatsApp</span></SocialContactLink>
                 <a
                   className="btn btn-primary"
                   href="https://yandex.ru/maps/?rtext=~55.039855,82.905859&rtt=auto"
@@ -969,8 +986,9 @@ export default function Home() {
             <b>Связь</b>
             <a href="tel:+79137871805">{phone}</a>
             <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
-            <a href={TELEGRAM_URL} target="_blank" rel="noreferrer">Telegram</a>
-            <a href={MAX_URL} target="_blank" rel="noreferrer">MAX</a>
+            <SocialContactLink type="Telegram"><span>Telegram</span></SocialContactLink>
+            <SocialContactLink type="MAX"><span>MAX</span></SocialContactLink>
+            <SocialContactLink type="WhatsApp"><span>WhatsApp</span></SocialContactLink>
           </div>
         </div>
         <div className="container footer-bottom">
