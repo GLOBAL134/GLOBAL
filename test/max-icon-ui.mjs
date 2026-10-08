@@ -13,7 +13,7 @@ try {
       const telegram = page.locator('.header-actions a[aria-label="Открыть Telegram GLOBAL"]');
       const max = page.locator('.header-actions a[aria-label="Открыть MAX GLOBAL"]');
       const whatsapp = page.locator('.header-actions a[aria-label="Открыть WhatsApp GLOBAL"]');
-      for (const icon of [max, whatsapp]) {
+      for (const icon of [telegram, max, whatsapp]) {
         const img = icon.locator('img');
         assert.ok(await img.evaluate(e => e.complete && e.naturalWidth > 0));
         assert.equal(await img.evaluate(e => getComputedStyle(e).maskImage), 'none');
@@ -23,9 +23,10 @@ try {
         assert.ok(t && m); assert.equal(t.width, m.width); assert.equal(t.height, m.height);
         assert.equal(m.width, 32);
       }
-      assert.match(await max.locator('img').getAttribute('src'), /\/site-GLOBAL\/images\/max-colored\.svg/);
-      assert.match(await whatsapp.locator('img').getAttribute('src'), /\/site-GLOBAL\/images\/whatsapp-white\.svg/);
-      console.log(`${width}px ${scrollY ? 'light' : 'dark'}: full-color assets visible at 32px`);
+      for (const [icon, name] of [[telegram, 'telegram'], [max, 'max'], [whatsapp, 'whatsapp']]) {
+        assert.match(await icon.locator('img').getAttribute('src'), new RegExp(`/site-GLOBAL/images/social-${name}\\.webp$`));
+      }
+      console.log(`${width}px ${scrollY ? 'light' : 'dark'}: approved assets visible at 32px hit area`);
     }
     await page.close();
   }

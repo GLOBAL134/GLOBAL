@@ -7,11 +7,12 @@ const source = (file) => readFileSync(new URL(`../src/${file}`, import.meta.url)
 const page = source('app/page.tsx');
 const form = source('components/ApplicationForm.tsx');
 
-test('header uses full-color official MAX art and preserves Telegram path', () => {
+test('header uses the three user-approved full-color assets', () => {
   assert.match(page, /<SocialContactLink type="MAX" className="channel-icon"/);
-  assert.match(page, /max-colored\.svg/);
+  assert.match(page, /social-max\.webp/);
   assert.match(page, /<SocialContactLink type="Telegram" className="channel-icon"/);
-  assert.match(page, /M21\.6 3\.5 18\.3 20c/);
+  assert.match(page, /social-telegram\.webp/);
+  assert.match(page, /social-whatsapp\.webp/);
 });
 
 test('the main review is a sourced short 2GIS excerpt', () => {

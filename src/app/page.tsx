@@ -24,15 +24,14 @@ import {
   type PopularDestination,
 } from "./site-data";
 
-const SocialContactIcon = ({ type }: { type: "Telegram" | "MAX" | "WhatsApp" }) => {
-  if (type === "Telegram") return <svg viewBox="0 0 24 24" fill="white" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#2AABEE" /><path d="M21.6 3.5 18.3 20c-.2.9-.8 1.2-1.6.8l-5-3.7-2.4 2.3c-.3.3-.5.5-1 .5l.4-5.1 9.4-8.5c.4-.4-.1-.6-.6-.3L5.9 13.5.9 12c-1.1-.3-1.1-1 .2-1.5L20.5 3c.9-.3 1.4.2 1.1.5Z" transform="translate(3 3) scale(.75)" /></svg>;
-  const src = `${process.env.NEXT_PUBLIC_BASE_PATH || ""}/images/${type === "MAX" ? "max-colored.svg" : "whatsapp-white.svg"}`;
-  return type === "MAX" ? <img src={src} width="32" height="32" alt="" aria-hidden="true" /> : <span className="whatsapp-icon"><img src={src} width="32" height="32" alt="" aria-hidden="true" /></span>;
-};
+const socialIconFiles = { Telegram: "social-telegram.webp", MAX: "social-max.webp", WhatsApp: "social-whatsapp.webp" };
+const SocialContactIcon = ({ type }: { type: "Telegram" | "MAX" | "WhatsApp" }) => (
+  <img className={`social-icon-${type.toLowerCase()}`} src={`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/images/${socialIconFiles[type]}`} width="32" height="32" alt="" aria-hidden="true" />
+);
 
-const SocialContactLink = ({ type, className = "", children }: { type: "Telegram" | "MAX" | "WhatsApp"; className?: string; children?: React.ReactNode }) => (
+const SocialContactLink = ({ type, className = "", showIcon = true, children }: { type: "Telegram" | "MAX" | "WhatsApp"; className?: string; showIcon?: boolean; children?: React.ReactNode }) => (
   <a className={className} href={type === "Telegram" ? TELEGRAM_URL : type === "MAX" ? MAX_URL : WHATSAPP_URL} target="_blank" rel="noreferrer" aria-label={`Открыть ${type} GLOBAL`} title={type}>
-    <SocialContactIcon type={type} />{children}
+    {showIcon && <SocialContactIcon type={type} />}{children}
   </a>
 );
 
@@ -935,9 +934,9 @@ export default function Home() {
                   <b>{x[0] === "Email" ? <a href={`mailto:${CONTACT_EMAIL}`}>{x[1]}</a> : x[1]}</b>
                 </div>
               ))}
-              <div className="contact-row"><span>Telegram</span><b><SocialContactLink type="Telegram"><span>@SVC_GLOBAL_NSK ↗</span></SocialContactLink></b></div>
-              <div className="contact-row"><span>MAX</span><b><SocialContactLink type="MAX"><span>Профиль GLOBAL ↗</span></SocialContactLink></b></div>
-              <div className="contact-row"><span>WhatsApp</span><b><SocialContactLink type="WhatsApp"><span>Написать ↗</span></SocialContactLink></b></div>
+              <div className="contact-row"><span>Telegram</span><b><SocialContactLink type="Telegram" showIcon={false}><span>@SVC_GLOBAL_NSK ↗</span></SocialContactLink></b></div>
+              <div className="contact-row"><span>MAX</span><b><SocialContactLink type="MAX" showIcon={false}><span>Профиль GLOBAL ↗</span></SocialContactLink></b></div>
+              <div className="contact-row"><span>WhatsApp</span><b><SocialContactLink type="WhatsApp" showIcon={false}><span>Написать ↗</span></SocialContactLink></b></div>
               <div className="contact-actions">
                 <SocialContactLink type="Telegram" className="btn btn-ghost on-dark"><span className="action-label">Telegram</span></SocialContactLink>
                 <SocialContactLink type="MAX" className="btn btn-ghost on-dark"><span className="action-label">MAX</span></SocialContactLink>
