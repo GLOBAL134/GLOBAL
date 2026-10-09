@@ -49,7 +49,7 @@ const SvgIcon = ({
 
     | "shield"
     | "copy"
-    | "translate";
+    | "banknotes";
 }) => {
   const paths = {
     search: (
@@ -83,9 +83,11 @@ const SvgIcon = ({
         <path d="m9 12 2 2 4-4" />
       </>
     ),
-    translate: (
+    banknotes: (
       <>
-        <path d="M3 5h12M9 3v2M5 5c1 5 4 8 9 10M13 5c-1 5-4 8-9 10M14 21l4-10 4 10M15.5 17h5" />
+        <path d="M7 4h15v10M5 7h15v10" />
+        <rect x="3" y="10" width="15" height="10" rx="1.5" />
+        <circle cx="10.5" cy="15" r="2.5" />
       </>
     ),
     copy: (

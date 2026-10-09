@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright';
 
 const baseURL = process.env.BASE_URL;
@@ -326,4 +327,26 @@ test('insurance and translation cards have detail and lead presets', async () =>
     assert.equal(await form.locator('select[name="service"]').inputValue(), 'Нотариально заверенный перевод');
     assert.equal(await form.locator('textarea[name="comment"]').inputValue(), 'Язык: Английский');
   });
+});
+
+test('only translation service renders stacked banknotes, at desktop and mobile', async () => {
+  for (const width of [1440, 390]) {
+    await withPage(width, async (page) => {
+      const translation = page.locator('.service-list article').filter({ hasText: 'Нотариально заверенные переводы' });
+      await translation.scrollIntoViewIfNeeded();
+      const icon = translation.locator(':scope > svg');
+      assert.equal(await icon.getAttribute('viewBox'), '0 0 24 24');
+      assert.equal(await icon.getAttribute('stroke'), 'currentColor');
+      assert.equal(await icon.locator('rect').count(), 1);
+      assert.equal(await icon.locator('circle').count(), 1);
+      assert.equal(await icon.locator('path').count(), 1);
+      assert.equal(await page.locator('.service-list article').filter({ hasText: 'Медицинское страхование путешественников' }).locator(':scope > svg circle').count(), 0);
+      assert.equal(await page.locator('.service-list article').filter({ hasText: 'Фото и копировальные услуги' }).locator(':scope > svg circle').count(), 0);
+      if (process.env.EVIDENCE_DIR) {
+        await mkdir(process.env.EVIDENCE_DIR, { recursive: true });
+        await page.waitForTimeout(650);
+        await translation.screenshot({ path: `${process.env.EVIDENCE_DIR}/translation-banknotes-${width}.png` });
+      }
+    });
+  }
 });

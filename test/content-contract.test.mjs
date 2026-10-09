@@ -81,6 +81,9 @@ test("service catalog contains exact public services and lead values", () => {
   assert.ok(translations);
   assert.equal(translations.formName, "Нотариально заверенный перевод");
   assert.equal(translations.detailTitle, "Перевод документов на английский язык");
+  assert.equal(translations.icon, "banknotes");
+  assert.equal(insurance.icon, "shield");
+  assert.equal(services.find((service) => service.name === "Фото и копировальные услуги")?.icon, "copy");
 });
 
 test("calculator extras come from service form names and exclude the primary service", () => {

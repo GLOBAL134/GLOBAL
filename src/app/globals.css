@@ -518,13 +518,8 @@ summary:focus-visible {
 .photo-frame.incoming.shown {
   opacity: 1;
 }
-.office-photo-slides .photo-frame[data-photo-index="3"] img {
-  object-position: center 32%;
-}
-@media (max-width: 700px) {
-  .office-photo-slides .photo-frame[data-photo-index="2"] img {
-    object-position: 58% center;
-  }
+.office-photo-slides img {
+  object-fit: fill;
 }
 .service-feature svg {
   width: 52px;

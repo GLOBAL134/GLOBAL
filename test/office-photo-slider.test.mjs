@@ -30,6 +30,7 @@ test('office visuals fill the existing card, preserve route and only two initial
         const box = card.getBoundingClientRect(), img = card.querySelector('.office-photo-slides img'), image = img?.getBoundingClientRect();
         return { box: box.toJSON(), image: image?.toJSON(), overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
           radius: getComputedStyle(card).borderRadius, fit: getComputedStyle(img).objectFit,
+          intrinsic: [img?.naturalWidth, img?.naturalHeight],
           loaded: img?.complete && img.naturalWidth > 0,
           text: card.querySelector(':scope > div:last-child')?.innerText,
           route: card.querySelector('a')?.getAttribute('href'), target: card.querySelector('a')?.target,
@@ -46,7 +47,8 @@ test('office visuals fill the existing card, preserve route and only two initial
       assert.match(data.text, /Офис GLOBAL[\s\S]*ул\. Челюскинцев, 15Б[\s\S]*1 этаж · 600 м от метро[\s\S]*Построить маршрут/);
       assert.equal(data.route, 'https://yandex.ru/maps/?rtext=~55.039855,82.905859&rtt=auto');
       assert.equal(data.target, '_blank');
-      assert.equal(data.fit, 'cover', `${width}: image must fill card without distortion`);
+      assert.equal(data.fit, 'fill', `${width}: full source frame must stretch across the card without cropping`);
+      assert.deepEqual(data.intrinsic, [1280, 649], `${width}: original entrance frame must load`);
       assert.equal(data.background, 'none', `${width}: no blurred duplicate behind image`);
       assert.ok(new Set(requests).size <= 2, `${width}: eager office requests ${requests.length}`);
       if (evidence) { await mkdir(evidence, { recursive: true }); await page.locator('.office-editorial').screenshot({ path: `${evidence}/office-${width}x${height}.png` }); }
@@ -87,7 +89,13 @@ test('office cycles entrance, map, sign and wraps at 5s with 800ms fade', { time
       seen.push(await current(page)); times.push(Date.now());
       const loaded = await page.locator('.office-photo-slides img').first().evaluate(el => el.complete && el.naturalWidth > 0 && Number(getComputedStyle(el).opacity) > .99);
       assert.ok(loaded, 'no solid valid base below incoming photo');
-      assert.equal(await page.locator('.office-photo-slides img').first().evaluate(el => getComputedStyle(el).objectFit), 'cover');
+      const frame = await page.locator('.office-photo-slides img').first().evaluate(el => ({
+        fit: getComputedStyle(el).objectFit, intrinsic: [el.naturalWidth, el.naturalHeight],
+        image: el.getBoundingClientRect().toJSON(), card: el.closest('.office-editorial').getBoundingClientRect().toJSON(),
+      }));
+      assert.equal(frame.fit, 'fill', `slide ${number}: show the full source, not a crop`);
+      assert.deepEqual(frame.intrinsic, { 1: [1280,649], 2: [1280,834], 3: [686,800] }[number]);
+      assert.ok(Math.abs(frame.image.width - frame.card.width) < 1 && Math.abs(frame.image.height - frame.card.height) < 1);
       assert.equal(await page.locator('.office-photo-slides .photo-frame').first().evaluate(el => getComputedStyle(el, '::before').content), 'none');
       if (evidence) await page.locator('.office-editorial').screenshot({ path: `${evidence}/office-desktop-slide-${number}.png` });
     }
@@ -98,14 +106,26 @@ test('office cycles entrance, map, sign and wraps at 5s with 800ms fade', { time
   } finally { await browser.close(); }
 });
 
-test('office mobile auto-advances and reduced-motion/hidden/offscreen pause', { timeout: 20000 }, async () => {
+test('office mobile auto-advances and reduced-motion/hidden/offscreen pause', { timeout: 38000 }, async () => {
   const browser = await chromium.launch();
   try {
-    const mobile = await open(browser, 390, 844);
-    await mobile.waitForFunction(() => document.querySelector('.office-photo-slides img')?.getAttribute('src')?.includes('office-slide-02'), { timeout: 8500 });
-    assert.equal(await current(mobile), 2);
-    if (evidence) await mobile.locator('.office-editorial').screenshot({ path: `${evidence}/office-mobile-map.png` });
-    await mobile.close();
+    for (const width of [390, 320]) {
+      const mobile = await open(browser, width, width === 390 ? 844 : 700);
+      for (const number of [2, 3]) {
+        await mobile.waitForFunction(n => document.querySelector('.office-photo-slides img')?.getAttribute('src')?.includes(`office-slide-0${n}`), number, { timeout: 8500 });
+        assert.equal(await current(mobile), number);
+        const frame = await mobile.locator('.office-photo-slides img').first().evaluate(el => ({
+          fit: getComputedStyle(el).objectFit, intrinsic: [el.naturalWidth, el.naturalHeight],
+          image: el.getBoundingClientRect().toJSON(), card: el.closest('.office-editorial').getBoundingClientRect().toJSON(),
+        }));
+        assert.equal(frame.fit, 'fill');
+        assert.deepEqual(frame.intrinsic, number === 2 ? [1280, 834] : [686, 800]);
+        assert.ok(Math.abs(frame.image.width - frame.card.width) < 1 && Math.abs(frame.image.height - frame.card.height) < 1);
+        assert.equal(await mobile.locator('.office-photo-slides .photo-frame').first().evaluate(el => getComputedStyle(el, '::before').content), 'none');
+        if (evidence) await mobile.locator('.office-editorial').screenshot({ path: `${evidence}/office-${width}-slide-${number}.png` });
+      }
+      await mobile.close();
+    }
     const reduced = await open(browser, 390, 844, 'reduce');
     await reduced.clock.install(); await reduced.clock.fastForward(12000);
     assert.equal(await current(reduced), 1);
