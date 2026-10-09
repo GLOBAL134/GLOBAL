@@ -469,7 +469,9 @@ summary:focus-visible {
 .service-feature {
   min-width: 0;
   min-height: 570px;
-  background: var(--forest);
+  position: relative;
+  isolation: isolate;
+  background: #101918;
   color: white;
   border-radius: 35px;
   padding: 28px;
@@ -479,35 +481,60 @@ summary:focus-visible {
   overflow: hidden;
 }
 .service-art {
-  height: 100%;
-  display: grid;
-  place-items: center;
-}
-.doc-stack {
-  width: 180px;
-  height: 250px;
-  position: relative;
-}
-.doc-stack span {
   position: absolute;
   inset: 0;
-  border-radius: 16px;
-  background: white;
-  color: var(--ink);
-  padding: 35px;
-  font-size: 34px;
-  font-weight: 900;
-  display: grid;
-  place-items: center;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
 }
-.doc-stack span:nth-child(1) {
-  transform: rotate(-13deg);
-  background: #dbe9db;
+.service-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgba(4, 20, 15, .9), rgba(4, 20, 15, .3) 70%, rgba(4, 20, 15, .08));
 }
-.doc-stack span:nth-child(2) {
-  transform: rotate(9deg);
-  background: var(--acid);
+.service-feature > div:last-child {
+  position: relative;
+  z-index: 1;
+  grid-column: 1 / -1;
+}
+.service-feature > div:last-child p {
+  color: #e1ebe5;
+}
+.photo-slides, .photo-frame {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.photo-frame img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.photo-frame.incoming {
+  opacity: 0;
+  transition: opacity var(--fade-duration) ease;
+}
+.photo-frame.incoming.shown {
+  opacity: 1;
+}
+.office-photo-slides .photo-frame::before {
+  content: "";
+  position: absolute;
+  inset: -12px;
+  background: var(--photo-url) center / cover;
+  filter: blur(14px) brightness(.7);
+}
+.office-photo-slides img {
+  object-fit: contain;
+}
+@media (max-width: 700px) {
+  .office-photo-slides .photo-frame[data-photo-index="2"] img {
+    object-position: center 12%;
+  }
+  .office-photo-slides .photo-frame[data-photo-index="3"] img {
+    height: 66%;
+  }
 }
 .service-feature svg {
   width: 52px;
@@ -993,16 +1020,14 @@ summary:focus-visible {
   position: absolute;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: 62% 50%;
 }
 .office-editorial:after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.75));
+  background: linear-gradient(transparent 55%, rgba(0, 0, 0, 0.58));
 }
-.office-editorial > div {
+.office-editorial > .office-caption {
   position: absolute;
   z-index: 2;
   left: 35px;
@@ -1923,12 +1948,6 @@ summary:focus-visible {
   .service-feature {
     grid-template-columns: 1fr;
     min-height: 620px;
-  }
-  .service-art {
-    height: 270px;
-  }
-  .doc-stack {
-    transform: scale(0.8);
   }
   .service-list article {
     grid-template-columns: 43px minmax(0, 1fr);

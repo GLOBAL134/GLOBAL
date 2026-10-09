@@ -6,6 +6,7 @@ import ApplicationForm, {
   type LeadPreset,
 } from "../components/ApplicationForm";
 import { GlobalLogo } from "../components/Brand";
+import { OfficePhotoSlider, VisaPhotoSlider } from "../components/VisaPhotoSlider";
 import {
   countries,
   countryGroups,
@@ -503,12 +504,8 @@ export default function Home() {
             </div>
             <div className="service-editorial">
               <article className="service-feature">
-                <div className="service-art">
-                  <div className="doc-stack">
-                    <span />
-                    <span />
-                    <span>VISA</span>
-                  </div>
+                <div className="service-art" aria-hidden="true">
+                  <VisaPhotoSlider />
                 </div>
                 <div>
                   <SvgIcon type="visa" />
@@ -749,8 +746,8 @@ export default function Home() {
               </a>
             </div>
             <div className="office-editorial">
-              <img src={photos[1]} alt="Офис GLOBAL" />
-              <div>
+              <OfficePhotoSlider />
+              <div className="office-caption">
                 <span>Офис GLOBAL</span>
                 <b>ул. Челюскинцев, 15Б</b>
                 <small>1 этаж · 600 м от метро</small>

@@ -54,8 +54,8 @@ test('point fixes preserve bounds and place hero stats only on mobile', async ()
         const hero = document.querySelector('.hero');
         const heroStyle = hero ? getComputedStyle(hero) : null;
         const stats = proof ? getComputedStyle(proof.querySelector('b')) : null;
-        const officeImages = [...document.querySelectorAll('img')]
-          .filter((image) => image.currentSrc.includes('/images/global-office.webp'))
+        const officeImages = [...document.querySelectorAll('.office-photo-slides img')]
+          .filter((image) => image.currentSrc.includes('/images/office-slider/office-slide-01.webp'))
           .map((image) => ({ src: image.currentSrc, naturalWidth: image.naturalWidth }));
         return {
           overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -73,7 +73,7 @@ test('point fixes preserve bounds and place hero stats only on mobile', async ()
       assert.ok(state.overflow <= 1, `${width}px: horizontal overflow ${state.overflow}px`);
       assert.ok(state.officeImages.length >= 1, `${width}px: office asset is not rendered`);
       for (const image of state.officeImages) {
-        assert.match(image.src, /\/images\/global-office\.webp$/);
+        assert.match(image.src, /\/images\/office-slider\/office-slide-01\.webp$/);
         assert.ok(image.naturalWidth > 0, `${width}px: office asset did not load`);
       }
       assert.ok(numericPixels(state.faqMarginTop) >= 20, `${width}px: FAQ CTA margin-top is ${state.faqMarginTop}`);
