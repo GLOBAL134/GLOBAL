@@ -2006,6 +2006,9 @@ summary:focus-visible {
     height: 380px;
     scroll-snap-align: start;
   }
+  .gallery-masonry button:nth-child(2) img {
+    object-position: 30% center;
+  }
   .lead-grid {
     gap: 35px;
   }

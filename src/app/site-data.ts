@@ -42,8 +42,8 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
 export const photos = [
   `${basePath}/images/gallery/gallery-01.webp`,
-  `${basePath}/images/gallery/gallery-02.webp`,
-  `${basePath}/images/gallery/gallery-03.webp`,
+  `${basePath}/images/gallery/hammock-beach.webp`,
+  `${basePath}/images/gallery/bike-alpine-lake.webp`,
 ];
 
 export const SCHENGEN_COUNTRIES = [

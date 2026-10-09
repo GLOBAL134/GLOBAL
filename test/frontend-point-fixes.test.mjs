@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
-import { mkdir } from 'node:fs/promises';
+import { mkdir, readFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 
 const baseURL = process.env.BASE_URL;
 if (!baseURL) {
@@ -45,17 +46,25 @@ function numericPixels(value) {
   return Number.parseFloat(value) || 0;
 }
 
-test('gallery uses three local photos in unchanged tiles and lightbox', async () => {
-  const alts = ['Пара с чемоданами в аэропорту', 'Две путешественницы с чемоданами в Праге', 'Путешественник с чемоданом у поезда'];
-  for (const width of [1920, 1440, 1024, 430, 390, 375, 320]) {
+test('gallery replaces only photos 02/03; preserves photo 01, tiles and shared lightbox', async () => {
+  const names = ['gallery-01.webp', 'hammock-beach.webp', 'bike-alpine-lake.webp'];
+  const alts = ['Пара с чемоданами в аэропорту', 'Мужчина отдыхает в гамаке на пляже у моря', 'Женщина на велосипеде у альпийского озера и гор'];
+  const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
+  const airportHash = '08dbc3737cdf2514a4901ad47ed994a8bee2cc9054433adbe2d45b3d657741f4';
+  assert.equal(sha256(await readFile(new URL('../public/images/gallery/gallery-01.webp', import.meta.url))), airportHash);
+  for (const width of widths) {
     await withPage(width, async (page) => {
       const gallery = page.locator('.gallery-masonry');
       await gallery.scrollIntoViewIfNeeded();
       for (let i = 0; i < 3; i++) {
-        await gallery.locator('button').nth(i).scrollIntoViewIfNeeded();
-        await gallery.locator('button img').nth(i).evaluate(img => img.decode());
+        const card = gallery.locator('button').nth(i);
+        await card.scrollIntoViewIfNeeded();
+        await card.locator('img').evaluate(img => img.decode());
+        if (evidence) {
+          await mkdir(evidence, { recursive: true });
+          await card.screenshot({ path: `${evidence}/gallery-${width}-card-${i + 1}.png` });
+        }
       }
-      await gallery.locator('button').first().scrollIntoViewIfNeeded();
       const tiles = await gallery.locator('button').evaluateAll(buttons => buttons.map(button => {
         const img = button.querySelector('img'), rect = button.getBoundingClientRect();
         return { rect: rect.toJSON(), src: img.currentSrc, loaded: img.complete && img.naturalWidth > 0,
@@ -64,33 +73,39 @@ test('gallery uses three local photos in unchanged tiles and lightbox', async ()
       }));
       assert.equal(tiles.length, 3);
       tiles.forEach((tile, i) => {
-        assert.match(tile.src, new RegExp(`/images/gallery/gallery-0${i + 1}\\.webp$`));
+        assert.ok(tile.src.endsWith(`/site-GLOBAL/images/gallery/${names[i]}`), `${width}px: wrong gallery photo ${i + 1}: ${tile.src}`);
         assert.ok(tile.loaded, `${width}px: gallery photo ${i + 1} failed to load`);
         assert.equal(tile.fit, 'cover');
         assert.equal(tile.alt, alts[i]);
         assert.equal(tile.radius, '25px');
         assert.equal(tile.number, `0${i + 1}`);
       });
+      const airportResponse = await page.request.get(tiles[0].src);
+      assert.equal(airportResponse.status(), 200);
+      assert.equal(sha256(await airportResponse.body()), airportHash);
       if (width > 700) {
-        assert.ok(Math.abs(tiles[0].rect.height - (tiles[1].rect.height + tiles[2].rect.height + 15)) < 1);
+        assert.ok(Math.abs(tiles[0].rect.height - 575) < 1);
         assert.ok(Math.abs(tiles[1].rect.height - 280) < 1 && Math.abs(tiles[2].rect.height - 280) < 1);
+        assert.ok(Math.abs(tiles[0].rect.right + 15 - tiles[1].rect.left) < 1);
+        assert.ok(Math.abs(tiles[1].rect.bottom + 15 - tiles[2].rect.top) < 1);
       } else {
         assert.ok(tiles.every(t => Math.abs(t.rect.height - 380) < 1 && t.rect.width <= width));
+        const scroll = await gallery.evaluate(el => ({ width: el.clientWidth, content: el.scrollWidth }));
+        assert.ok(scroll.content > scroll.width, `${width}px: gallery must scroll within its container`);
       }
-      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `${width}px: horizontal overflow`);
-      if (evidence) { await mkdir(evidence, { recursive: true }); await gallery.screenshot({ path: `${evidence}/gallery-${width}.png` }); }
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `${width}px: document horizontal overflow`);
       if ([1440, 390].includes(width)) {
         for (let i = 0; i < 3; i++) {
           await gallery.locator('button').nth(i).click();
           const photo = page.locator('.lightbox img');
-          assert.match(await photo.getAttribute('src'), new RegExp(`/images/gallery/gallery-0${i + 1}\\.webp$`));
+          assert.ok((await photo.getAttribute('src')).endsWith(`/site-GLOBAL/images/gallery/${names[i]}`));
           assert.equal(await photo.getAttribute('alt'), alts[i]);
           assert.ok(await photo.evaluate(img => img.complete && img.naturalWidth > 0));
           if (evidence) await page.locator('.lightbox').screenshot({ path: `${evidence}/gallery-lightbox-${width}-${i + 1}.png` });
           await page.locator('.lightbox-next').click();
-          assert.match(await photo.getAttribute('src'), new RegExp(`/images/gallery/gallery-0${(i + 1) % 3 + 1}\\.webp$`));
+          assert.ok((await photo.getAttribute('src')).endsWith(`/site-GLOBAL/images/gallery/${names[(i + 1) % 3]}`));
           await page.locator('.lightbox-prev').click();
-          assert.match(await photo.getAttribute('src'), new RegExp(`/images/gallery/gallery-0${i + 1}\\.webp$`));
+          assert.ok((await photo.getAttribute('src')).endsWith(`/site-GLOBAL/images/gallery/${names[i]}`));
           await page.locator('.lightbox-close').click();
           assert.equal(await page.locator('.lightbox').count(), 0);
         }

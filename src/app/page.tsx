@@ -26,7 +26,7 @@ import {
 } from "./site-data";
 
 const socialIconFiles = { Telegram: "social-telegram.webp", MAX: "social-max.webp", WhatsApp: "social-whatsapp.webp" };
-const galleryAlts = ["Пара с чемоданами в аэропорту", "Две путешественницы с чемоданами в Праге", "Путешественник с чемоданом у поезда"];
+const galleryAlts = ["Пара с чемоданами в аэропорту", "Мужчина отдыхает в гамаке на пляже у моря", "Женщина на велосипеде у альпийского озера и гор"];
 const SocialContactIcon = ({ type }: { type: "Telegram" | "MAX" | "WhatsApp" }) => (
   <img className={`social-icon-${type.toLowerCase()}`} src={`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/images/${socialIconFiles[type]}`} width="32" height="32" alt="" aria-hidden="true" />
 );
