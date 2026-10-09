@@ -66,7 +66,7 @@ function PhotoSlider({ photos, className, fadeMs }: { photos: string[]; classNam
 
   const frame = (photo: number, fading: boolean) => (
     <div key={photo} data-photo-index={photo + 1} className={`photo-frame${fading ? ` incoming${shown ? " shown" : ""}` : ""}`}
-      style={{ "--photo-url": `url("${photos[photo]}")`, "--fade-duration": `${fadeMs}ms` } as CSSProperties}
+      style={{ "--fade-duration": `${fadeMs}ms` } as CSSProperties}
       onTransitionEnd={fading ? (event) => {
         if (event.target !== event.currentTarget || event.propertyName !== "opacity") return;
         hasFaded.current = true;

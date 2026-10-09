@@ -518,22 +518,12 @@ summary:focus-visible {
 .photo-frame.incoming.shown {
   opacity: 1;
 }
-.office-photo-slides .photo-frame::before {
-  content: "";
-  position: absolute;
-  inset: -12px;
-  background: var(--photo-url) center / cover;
-  filter: blur(14px) brightness(.7);
-}
-.office-photo-slides img {
-  object-fit: contain;
+.office-photo-slides .photo-frame[data-photo-index="3"] img {
+  object-position: center 32%;
 }
 @media (max-width: 700px) {
   .office-photo-slides .photo-frame[data-photo-index="2"] img {
-    object-position: center 12%;
-  }
-  .office-photo-slides .photo-frame[data-photo-index="3"] img {
-    height: 66%;
+    object-position: 58% center;
   }
 }
 .service-feature svg {
@@ -1148,9 +1138,6 @@ summary:focus-visible {
 }
 .gallery-masonry button:hover img {
   transform: scale(1.05);
-}
-.gallery-masonry img[src*="global-office.webp"] {
-  object-position: 62% 50%;
 }
 .gallery-masonry span {
   position: absolute;

@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
+import { mkdir } from 'node:fs/promises';
 
 const baseURL = process.env.BASE_URL;
 if (!baseURL) {
@@ -8,6 +9,7 @@ if (!baseURL) {
 }
 
 const widths = [1920, 1440, 1024, 768, 430, 390, 375, 320];
+const evidence = process.env.EVIDENCE_DIR;
 
 async function withPage(width, fn) {
   const browser = await chromium.launch({ headless: true });
@@ -26,7 +28,7 @@ async function withPage(width, fn) {
     }
   });
   page.on('request', (request) => {
-    if (request.method() === 'POST') postRequests.push(request.url());
+    if (request.method() === 'POST' && request.frame() === page.mainFrame()) postRequests.push(request.url());
   });
   try {
     await page.goto(`${baseURL}?point-fixes=${Date.now()}-${width}`, { waitUntil: 'networkidle' });
@@ -42,6 +44,60 @@ async function withPage(width, fn) {
 function numericPixels(value) {
   return Number.parseFloat(value) || 0;
 }
+
+test('gallery uses three local photos in unchanged tiles and lightbox', async () => {
+  const alts = ['Пара с чемоданами в аэропорту', 'Две путешественницы с чемоданами в Праге', 'Путешественник с чемоданом у поезда'];
+  for (const width of [1920, 1440, 1024, 430, 390, 375, 320]) {
+    await withPage(width, async (page) => {
+      const gallery = page.locator('.gallery-masonry');
+      await gallery.scrollIntoViewIfNeeded();
+      for (let i = 0; i < 3; i++) {
+        await gallery.locator('button').nth(i).scrollIntoViewIfNeeded();
+        await gallery.locator('button img').nth(i).evaluate(img => img.decode());
+      }
+      await gallery.locator('button').first().scrollIntoViewIfNeeded();
+      const tiles = await gallery.locator('button').evaluateAll(buttons => buttons.map(button => {
+        const img = button.querySelector('img'), rect = button.getBoundingClientRect();
+        return { rect: rect.toJSON(), src: img.currentSrc, loaded: img.complete && img.naturalWidth > 0,
+          fit: getComputedStyle(img).objectFit, alt: img.alt, radius: getComputedStyle(button).borderRadius,
+          number: button.querySelector('span')?.textContent };
+      }));
+      assert.equal(tiles.length, 3);
+      tiles.forEach((tile, i) => {
+        assert.match(tile.src, new RegExp(`/images/gallery/gallery-0${i + 1}\\.webp$`));
+        assert.ok(tile.loaded, `${width}px: gallery photo ${i + 1} failed to load`);
+        assert.equal(tile.fit, 'cover');
+        assert.equal(tile.alt, alts[i]);
+        assert.equal(tile.radius, '25px');
+        assert.equal(tile.number, `0${i + 1}`);
+      });
+      if (width > 700) {
+        assert.ok(Math.abs(tiles[0].rect.height - (tiles[1].rect.height + tiles[2].rect.height + 15)) < 1);
+        assert.ok(Math.abs(tiles[1].rect.height - 280) < 1 && Math.abs(tiles[2].rect.height - 280) < 1);
+      } else {
+        assert.ok(tiles.every(t => Math.abs(t.rect.height - 380) < 1 && t.rect.width <= width));
+      }
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `${width}px: horizontal overflow`);
+      if (evidence) { await mkdir(evidence, { recursive: true }); await gallery.screenshot({ path: `${evidence}/gallery-${width}.png` }); }
+      if ([1440, 390].includes(width)) {
+        for (let i = 0; i < 3; i++) {
+          await gallery.locator('button').nth(i).click();
+          const photo = page.locator('.lightbox img');
+          assert.match(await photo.getAttribute('src'), new RegExp(`/images/gallery/gallery-0${i + 1}\\.webp$`));
+          assert.equal(await photo.getAttribute('alt'), alts[i]);
+          assert.ok(await photo.evaluate(img => img.complete && img.naturalWidth > 0));
+          if (evidence) await page.locator('.lightbox').screenshot({ path: `${evidence}/gallery-lightbox-${width}-${i + 1}.png` });
+          await page.locator('.lightbox-next').click();
+          assert.match(await photo.getAttribute('src'), new RegExp(`/images/gallery/gallery-0${(i + 1) % 3 + 1}\\.webp$`));
+          await page.locator('.lightbox-prev').click();
+          assert.match(await photo.getAttribute('src'), new RegExp(`/images/gallery/gallery-0${i + 1}\\.webp$`));
+          await page.locator('.lightbox-close').click();
+          assert.equal(await page.locator('.lightbox').count(), 0);
+        }
+      }
+    });
+  }
+});
 
 test('point fixes preserve bounds and place hero stats only on mobile', async () => {
   for (const width of widths) {

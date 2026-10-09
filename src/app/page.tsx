@@ -26,6 +26,7 @@ import {
 } from "./site-data";
 
 const socialIconFiles = { Telegram: "social-telegram.webp", MAX: "social-max.webp", WhatsApp: "social-whatsapp.webp" };
+const galleryAlts = ["Пара с чемоданами в аэропорту", "Две путешественницы с чемоданами в Праге", "Путешественник с чемоданом у поезда"];
 const SocialContactIcon = ({ type }: { type: "Telegram" | "MAX" | "WhatsApp" }) => (
   <img className={`social-icon-${type.toLowerCase()}`} src={`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/images/${socialIconFiles[type]}`} width="32" height="32" alt="" aria-hidden="true" />
 );
@@ -840,7 +841,7 @@ export default function Home() {
                 >
                   <img
                     src={p}
-                    alt={`Офис GLOBAL ${i + 1}`}
+                    alt={galleryAlts[i]}
                     loading={i ? "lazy" : "eager"}
                   />
                   <span>0{i + 1}</span>
@@ -1354,7 +1355,7 @@ export default function Home() {
           >
             ←
           </button>
-          <img src={photos[lightbox]} alt={`Офис GLOBAL ${lightbox + 1}`} />
+          <img src={photos[lightbox]} alt={galleryAlts[lightbox]} />
           <button
             className="lightbox-next"
             aria-label="Следующая фотография"

@@ -16,7 +16,7 @@ async function open(browser, width = 1440, height = 900, reducedMotion = 'no-pre
   return page;
 }
 
-test('office visuals preserve placement, route, full subjects and only two initial requests at seven widths', async () => {
+test('office visuals fill the existing card, preserve route and only two initial requests at seven widths', async () => {
   const browser = await chromium.launch();
   try {
     for (const [width, height] of widths) {
@@ -33,7 +33,7 @@ test('office visuals preserve placement, route, full subjects and only two initi
           loaded: img?.complete && img.naturalWidth > 0,
           text: card.querySelector(':scope > div:last-child')?.innerText,
           route: card.querySelector('a')?.getAttribute('href'), target: card.querySelector('a')?.target,
-          background: getComputedStyle(card.querySelector('.office-photo-slides > div'), '::before').backgroundImage,
+          background: getComputedStyle(card.querySelector('.office-photo-slides > div'), '::before').content,
           textBounds: [...card.querySelectorAll(':scope > div:last-child > *')].map(e => e.getBoundingClientRect().toJSON()),
         };
       });
@@ -46,8 +46,8 @@ test('office visuals preserve placement, route, full subjects and only two initi
       assert.match(data.text, /Офис GLOBAL[\s\S]*ул\. Челюскинцев, 15Б[\s\S]*1 этаж · 600 м от метро[\s\S]*Построить маршрут/);
       assert.equal(data.route, 'https://yandex.ru/maps/?rtext=~55.039855,82.905859&rtt=auto');
       assert.equal(data.target, '_blank');
-      assert.equal(data.fit, 'contain', `${width}: entrance/map/sign must remain fully in frame`);
-      assert.match(data.background, /office-slide-01/, `${width}: photo should fill letterbox background`);
+      assert.equal(data.fit, 'cover', `${width}: image must fill card without distortion`);
+      assert.equal(data.background, 'none', `${width}: no blurred duplicate behind image`);
       assert.ok(new Set(requests).size <= 2, `${width}: eager office requests ${requests.length}`);
       if (evidence) { await mkdir(evidence, { recursive: true }); await page.locator('.office-editorial').screenshot({ path: `${evidence}/office-${width}x${height}.png` }); }
       if (width === 1440) {
@@ -68,7 +68,7 @@ test('office visuals preserve placement, route, full subjects and only two initi
   } finally { await browser.close(); }
 });
 
-test('office cycles entrance, full map, full sign and wraps at 5s with 800ms fade', { timeout: 32000 }, async () => {
+test('office cycles entrance, map, sign and wraps at 5s with 800ms fade', { timeout: 32000 }, async () => {
   const browser = await chromium.launch();
   try {
     const page = await open(browser);
@@ -87,7 +87,8 @@ test('office cycles entrance, full map, full sign and wraps at 5s with 800ms fad
       seen.push(await current(page)); times.push(Date.now());
       const loaded = await page.locator('.office-photo-slides img').first().evaluate(el => el.complete && el.naturalWidth > 0 && Number(getComputedStyle(el).opacity) > .99);
       assert.ok(loaded, 'no solid valid base below incoming photo');
-      assert.equal(await page.locator('.office-photo-slides img').first().evaluate(el => getComputedStyle(el).objectFit), 'contain');
+      assert.equal(await page.locator('.office-photo-slides img').first().evaluate(el => getComputedStyle(el).objectFit), 'cover');
+      assert.equal(await page.locator('.office-photo-slides .photo-frame').first().evaluate(el => getComputedStyle(el, '::before').content), 'none');
       if (evidence) await page.locator('.office-editorial').screenshot({ path: `${evidence}/office-desktop-slide-${number}.png` });
     }
     assert.deepEqual(seen, [1,2,3,1]);

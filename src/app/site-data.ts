@@ -41,9 +41,9 @@ export const MAX_URL = "https://max.ru/u/f9LHodD0cOL9XCvB0s54oOa-5DtER3blB5RfJKi
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
 export const photos = [
-  "https://avatars.mds.yandex.net/get-altay/17637863/2a0000019c669dfc607d71279ab8b7c2625b/orig",
-  `${basePath}/images/global-office.webp`,
-  "https://avatars.mds.yandex.net/get-altay/18111128/2a0000019c669814a8294c3839199ba1cf8a/XXL_height",
+  `${basePath}/images/gallery/gallery-01.webp`,
+  `${basePath}/images/gallery/gallery-02.webp`,
+  `${basePath}/images/gallery/gallery-03.webp`,
 ];
 
 export const SCHENGEN_COUNTRIES = [
