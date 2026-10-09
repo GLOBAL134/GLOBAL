@@ -16,7 +16,7 @@ async function open(browser, width = 1440, height = 900, reducedMotion = 'no-pre
   return page;
 }
 
-test('office photos preserve desktop fill and mobile aspect ratios, route and lazy loading', async () => {
+test('office photos fill the whole card at every width, preserving route and lazy loading', async () => {
   const browser = await chromium.launch();
   try {
     for (const [width, height] of widths) {
@@ -30,31 +30,24 @@ test('office photos preserve desktop fill and mobile aspect ratios, route and la
         const box = card.getBoundingClientRect(), img = card.querySelector('.office-photo-slides img'), image = img?.getBoundingClientRect();
         return { box: box.toJSON(), image: image?.toJSON(), overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
           radius: getComputedStyle(card).borderRadius, fit: getComputedStyle(img).objectFit,
-          cardBackground: getComputedStyle(card).backgroundColor,
           intrinsic: [img?.naturalWidth, img?.naturalHeight],
           loaded: img?.complete && img.naturalWidth > 0,
           text: card.querySelector(':scope > div:last-child')?.innerText,
           route: card.querySelector('a')?.getAttribute('href'), target: card.querySelector('a')?.target,
           background: getComputedStyle(card.querySelector('.office-photo-slides > div'), '::before').content,
           textBounds: [...card.querySelectorAll(':scope > div:last-child > *')].map(e => e.getBoundingClientRect().toJSON()),
-          caption: card.querySelector('.office-caption').getBoundingClientRect().toJSON(),
         };
       });
       assert.ok(data.loaded, `${width}: missing entrance photo`);
       assert.equal(data.radius, '30px');
       assert.ok(data.box.height >= (width <= 700 ? 450 : 520) && data.box.width > 0);
-      assert.ok(Math.abs(data.image.width - data.box.width) < 1);
-      if (width <= 700) {
-        assert.equal(data.cardBackground, 'rgb(16, 25, 24)', `${width}: plain themed dark base`);
-        assert.ok(Math.abs(data.image.height / data.image.width - data.intrinsic[1] / data.intrinsic[0]) < .005, `${width}: entrance distorted`);
-        assert.ok(data.image.top >= data.box.top - 1 && data.image.bottom <= data.caption.top + 1, `${width}: entrance clipped or under caption`);
-      } else assert.ok(Math.abs(data.image.height - data.box.height) < 1);
+      assert.ok(Math.abs(data.image.left - data.box.left) < 1 && Math.abs(data.image.top - data.box.top) < 1 && Math.abs(data.image.width - data.box.width) < 1 && Math.abs(data.image.height - data.box.height) < 1, `${width}: entrance must fill card`);
       assert.ok(data.overflow <= 1, `${width}: horizontal overflow ${data.overflow}`);
       assert.ok(data.textBounds.every(r => r.left >= data.box.left - 1 && r.right <= data.box.right + 1 && r.bottom <= data.box.bottom + 1), `${width}: overlay clipped`);
       assert.match(data.text, /Офис GLOBAL[\s\S]*ул\. Челюскинцев, 15Б[\s\S]*1 этаж · 600 м от метро[\s\S]*Построить маршрут/);
       assert.equal(data.route, 'https://yandex.ru/maps/?rtext=~55.039855,82.905859&rtt=auto');
       assert.equal(data.target, '_blank');
-      assert.equal(data.fit, width <= 700 ? 'contain' : 'fill', `${width}: office framing`);
+      assert.equal(data.fit, 'fill', `${width}: office framing`);
       assert.deepEqual(data.intrinsic, [1280, 649], `${width}: original entrance frame must load`);
       assert.equal(data.background, 'none', `${width}: no blurred duplicate behind image`);
       assert.ok(new Set(requests).size <= 2, `${width}: eager office requests ${requests.length}`);
@@ -113,30 +106,53 @@ test('office cycles entrance, map, sign and wraps at 5s with 800ms fade', { time
   } finally { await browser.close(); }
 });
 
-test('office mobile auto-advances, fully fits both landscapes and pauses when needed', { timeout: 68000 }, async () => {
+test('office mobile frames and both crossfade directions fill stable card; pauses when needed', { timeout: 80000 }, async () => {
   const browser = await chromium.launch();
   try {
     for (const width of [430, 390, 375, 320]) {
       const mobile = await open(browser, width, width === 390 ? 844 : 700);
       const initialCard = await mobile.locator('.office-editorial').boundingBox();
-      for (const number of [2, 3]) {
+      const initialCaption = await mobile.locator('.office-caption').boundingBox();
+      const assertBounds = async (label) => {
+        const state = await mobile.locator('.office-editorial').evaluate(card => ({
+          card: card.getBoundingClientRect().toJSON(),
+          caption: card.querySelector('.office-caption').getBoundingClientRect().toJSON(),
+          frames: [...card.querySelectorAll('.photo-frame')].map(frame => ({
+            frame: frame.getBoundingClientRect().toJSON(), image: frame.querySelector('img').getBoundingClientRect().toJSON(),
+            fit: getComputedStyle(frame.querySelector('img')).objectFit,
+          })),
+        }));
+        for (const box of [state.card, ...state.frames.flatMap(f => [f.frame, f.image])]) {
+          assert.ok(Math.abs(box.x - initialCard.x) < 1 && Math.abs(box.y - initialCard.y) < 1 && Math.abs(box.width - initialCard.width) < 1 && Math.abs(box.height - initialCard.height) < 1, `${width} ${label}: photo leaves card bounds`);
+        }
+        assert.ok(state.frames.every(f => f.fit === 'fill'), `${width} ${label}: cropped or contained photo`);
+        assert.ok(Math.abs(state.caption.x - initialCaption.x) < 1 && Math.abs(state.caption.y - initialCaption.y) < 1 && Math.abs(state.caption.width - initialCaption.width) < 1 && Math.abs(state.caption.height - initialCaption.height) < 1, `${width} ${label}: caption shifts`);
+        assert.equal(await mobile.locator('.office-editorial').evaluate(card => getComputedStyle(card, '::before').content), 'none');
+      };
+      await assertBounds('settled 1');
+      if (evidence && [390, 320].includes(width)) await mobile.locator('.office-editorial').screenshot({ path: `${evidence}/office-${width}-slide-1.png` });
+      for (const number of [2, 3, ...([390, 320].includes(width) ? [1] : [])]) {
+        if ([390, 320].includes(width) && (number === 2 || number === 1)) {
+          const fade = mobile.locator('.office-photo-slides .photo-frame.incoming.shown');
+          await fade.waitFor({ timeout: 8500 });
+          await mobile.waitForTimeout(120);
+          await assertBounds(`crossfade ${number === 2 ? '1→2' : '3→1'}`);
+          const opacity = await fade.evaluate(el => [Number(getComputedStyle(el).opacity), Number(getComputedStyle(el.previousElementSibling).opacity)]);
+          assert.ok(opacity[0] > 0 && opacity[0] < 1 && opacity[1] === 1, `${width}: mid-crossfade ${opacity}`);
+          if (evidence) await mobile.locator('.office-editorial').screenshot({ path: `${evidence}/office-${width}-crossfade-${number === 2 ? '1-to-2' : '3-to-1'}.png` });
+        }
         await mobile.waitForFunction(n => document.querySelector('.office-photo-slides img')?.getAttribute('src')?.includes(`office-slide-0${n}`), number, { timeout: 8500 });
         assert.equal(await current(mobile), number);
         const frame = await mobile.locator('.office-photo-slides img').first().evaluate(el => ({
           fit: getComputedStyle(el).objectFit, intrinsic: [el.naturalWidth, el.naturalHeight],
           image: el.getBoundingClientRect().toJSON(), card: el.closest('.office-editorial').getBoundingClientRect().toJSON(),
-          caption: el.closest('.office-editorial').querySelector('.office-caption').getBoundingClientRect().toJSON(),
         }));
-        assert.equal(frame.fit, number === 2 ? 'contain' : 'fill');
+        assert.equal(frame.fit, 'fill');
         assert.ok(Math.abs(frame.card.width - initialCard.width) < 1 && Math.abs(frame.card.height - initialCard.height) < 1, `${width}: slide ${number} jumps card dimensions`);
-        assert.deepEqual(frame.intrinsic, number === 2 ? [1280, 834] : [686, 800]);
-        assert.ok(Math.abs(frame.image.width - frame.card.width) < 1);
-        if (number === 2) {
-          assert.ok(Math.abs(frame.image.height / frame.image.width - 834 / 1280) < .005, `${width}: map distorted`);
-          assert.ok(frame.image.top >= frame.card.top - 1 && frame.image.bottom <= frame.caption.top + 1, `${width}: map clipped or under caption`);
-        } else assert.ok(Math.abs(frame.image.height - frame.card.height) < 1, `${width}: sign must retain full-card behavior`);
+        assert.deepEqual(frame.intrinsic, { 1: [1280,649], 2: [1280,834], 3: [686,800] }[number]);
+        await assertBounds(`settled ${number}`);
         assert.equal(await mobile.locator('.office-photo-slides .photo-frame').first().evaluate(el => getComputedStyle(el, '::before').content), 'none');
-        if (evidence) await mobile.locator('.office-editorial').screenshot({ path: `${evidence}/office-${width}-slide-${number}.png` });
+        if (evidence && [390, 320].includes(width)) await mobile.locator('.office-editorial').screenshot({ path: `${evidence}/office-${width}-slide-${number}.png` });
       }
       await mobile.close();
     }
