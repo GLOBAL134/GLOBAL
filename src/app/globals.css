@@ -1103,47 +1103,6 @@ summary:focus-visible {
 .review-links a:hover b {
   transform: translate(3px, -3px);
 }
-.gallery-section {
-  background: #101d18;
-  color: white;
-}
-.gallery-masonry {
-  display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  grid-template-rows: 280px 280px;
-  gap: 15px;
-  margin-top: 40px;
-}
-.gallery-masonry button {
-  border: 0;
-  padding: 0;
-  position: relative;
-  overflow: hidden;
-  border-radius: 25px;
-  cursor: pointer;
-}
-.gallery-masonry button:first-child {
-  grid-row: span 2;
-}
-.gallery-masonry img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.6s;
-}
-.gallery-masonry button:hover img {
-  transform: scale(1.05);
-}
-.gallery-masonry span {
-  position: absolute;
-  bottom: 14px;
-  right: 14px;
-  background: white;
-  color: var(--ink);
-  padding: 8px 10px;
-  border-radius: 999px;
-  font-weight: 800;
-}
 .faq-grid {
   display: grid;
   grid-template-columns: 0.7fr 1.3fr;
@@ -1628,45 +1587,6 @@ summary:focus-visible {
   gap: 12px;
   margin-top: 25px;
 }
-.lightbox {
-  position: fixed;
-  z-index: 110;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.92);
-  display: grid;
-  place-items: center;
-  padding: 30px;
-}
-.lightbox img {
-  max-width: min(1050px, 85vw);
-  max-height: 84vh;
-  border-radius: 18px;
-}
-.lightbox button {
-  position: absolute;
-  border: 0;
-  background: white;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  font-size: 24px;
-  cursor: pointer;
-}
-.lightbox-close {
-  top: 18px;
-  right: 18px;
-}
-.lightbox-prev {
-  left: 25px;
-}
-.lightbox-next {
-  right: 25px;
-}
-.lightbox > span {
-  position: absolute;
-  bottom: 18px;
-  color: white;
-}
 .legal-page {
   min-height: 100vh;
   padding: 70px 20px;
@@ -1995,20 +1915,6 @@ summary:focus-visible {
   .review-stage article {
     padding: 27px;
   }
-  .gallery-masonry {
-    display: flex;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-  }
-  .gallery-masonry button,
-  .gallery-masonry button:first-child {
-    min-width: 87%;
-    height: 380px;
-    scroll-snap-align: start;
-  }
-  .gallery-masonry button:nth-child(2) img {
-    object-position: 30% center;
-  }
   .lead-grid {
     gap: 35px;
   }
@@ -2114,18 +2020,6 @@ summary:focus-visible {
   }
   .wizard-body {
     min-height: 330px;
-  }
-  .lightbox {
-    padding: 12px;
-  }
-  .lightbox img {
-    max-width: 94vw;
-  }
-  .lightbox-prev {
-    left: 8px;
-  }
-  .lightbox-next {
-    right: 8px;
   }
 }
 @media (max-width: 767px) {

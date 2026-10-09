@@ -38,14 +38,6 @@ export const WHATSAPP_URL = "https://wa.me/79137871805";
 export const TELEGRAM_URL = "https://t.me/SVC_GLOBAL_NSK";
 export const MAX_URL = "https://max.ru/u/f9LHodD0cOL9XCvB0s54oOa-5DtER3blB5RfJKiYU-tE9NGhkphplmudTYk";
 
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
-
-export const photos = [
-  `${basePath}/images/gallery/gallery-01.webp`,
-  `${basePath}/images/gallery/hammock-beach.webp`,
-  `${basePath}/images/gallery/bike-alpine-lake.webp`,
-];
-
 export const SCHENGEN_COUNTRIES = [
   "Австрия",
   "Бельгия",

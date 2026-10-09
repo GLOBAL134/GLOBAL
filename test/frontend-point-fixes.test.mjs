@@ -1,8 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
-import { mkdir, readFile } from 'node:fs/promises';
-import { createHash } from 'node:crypto';
+import { mkdir } from 'node:fs/promises';
 
 const baseURL = process.env.BASE_URL;
 if (!baseURL) {
@@ -12,7 +11,7 @@ if (!baseURL) {
 const widths = [1920, 1440, 1024, 768, 430, 390, 375, 320];
 const evidence = process.env.EVIDENCE_DIR;
 
-async function withPage(width, fn) {
+async function withPage(width, fn, galleryRequests) {
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage({
     viewport: { width, height: width >= 1200 ? 900 : 844 },
@@ -30,6 +29,7 @@ async function withPage(width, fn) {
   });
   page.on('request', (request) => {
     if (request.method() === 'POST' && request.frame() === page.mainFrame()) postRequests.push(request.url());
+    if (galleryRequests && new URL(request.url()).pathname.includes('/images/gallery/')) galleryRequests.push(request.url());
   });
   try {
     await page.goto(`${baseURL}?point-fixes=${Date.now()}-${width}`, { waitUntil: 'networkidle' });
@@ -46,72 +46,68 @@ function numericPixels(value) {
   return Number.parseFloat(value) || 0;
 }
 
-test('gallery replaces only photos 02/03; preserves photo 01, tiles and shared lightbox', async () => {
-  const names = ['gallery-01.webp', 'hammock-beach.webp', 'bike-alpine-lake.webp'];
-  const alts = ['Пара с чемоданами в аэропорту', 'Мужчина отдыхает в гамаке на пляже у моря', 'Женщина на велосипеде у альпийского озера и гор'];
-  const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
-  const airportHash = '08dbc3737cdf2514a4901ad47ed994a8bee2cc9054433adbe2d45b3d657741f4';
-  assert.equal(sha256(await readFile(new URL('../public/images/gallery/gallery-01.webp', import.meta.url))), airportHash);
+test('gallery is absent and reviews flow directly into FAQ', async () => {
   for (const width of widths) {
+    const galleryRequests = [];
     await withPage(width, async (page) => {
-      const gallery = page.locator('.gallery-masonry');
-      await gallery.scrollIntoViewIfNeeded();
-      for (let i = 0; i < 3; i++) {
-        const card = gallery.locator('button').nth(i);
-        await card.scrollIntoViewIfNeeded();
-        await card.locator('img').evaluate(img => img.decode());
-        if (evidence) {
-          await mkdir(evidence, { recursive: true });
-          await card.screenshot({ path: `${evidence}/gallery-${width}-card-${i + 1}.png` });
-        }
-      }
-      const tiles = await gallery.locator('button').evaluateAll(buttons => buttons.map(button => {
-        const img = button.querySelector('img'), rect = button.getBoundingClientRect();
-        return { rect: rect.toJSON(), src: img.currentSrc, loaded: img.complete && img.naturalWidth > 0,
-          fit: getComputedStyle(img).objectFit, alt: img.alt, radius: getComputedStyle(button).borderRadius,
-          number: button.querySelector('span')?.textContent };
-      }));
-      assert.equal(tiles.length, 3);
-      tiles.forEach((tile, i) => {
-        assert.ok(tile.src.endsWith(`/site-GLOBAL/images/gallery/${names[i]}`), `${width}px: wrong gallery photo ${i + 1}: ${tile.src}`);
-        assert.ok(tile.loaded, `${width}px: gallery photo ${i + 1} failed to load`);
-        assert.equal(tile.fit, 'cover');
-        assert.equal(tile.alt, alts[i]);
-        assert.equal(tile.radius, '25px');
-        assert.equal(tile.number, `0${i + 1}`);
+      const reviews = page.locator('.reviews-section');
+      const faq = page.locator('.faq-section');
+      await reviews.scrollIntoViewIfNeeded();
+      await faq.scrollIntoViewIfNeeded();
+      const state = await page.evaluate(() => {
+        const reviews = document.querySelector('.reviews-section');
+        const faq = document.querySelector('.faq-section');
+        return {
+          adjacent: reviews?.nextElementSibling === faq,
+          reviewsBottom: reviews?.getBoundingClientRect().bottom,
+          faqTop: faq?.getBoundingClientRect().top,
+          reviewText: reviews?.textContent,
+          faqText: faq?.textContent,
+          overflow: document.documentElement.scrollWidth - innerWidth,
+        };
       });
-      const airportResponse = await page.request.get(tiles[0].src);
-      assert.equal(airportResponse.status(), 200);
-      assert.equal(sha256(await airportResponse.body()), airportHash);
-      if (width > 700) {
-        assert.ok(Math.abs(tiles[0].rect.height - 575) < 1);
-        assert.ok(Math.abs(tiles[1].rect.height - 280) < 1 && Math.abs(tiles[2].rect.height - 280) < 1);
-        assert.ok(Math.abs(tiles[0].rect.right + 15 - tiles[1].rect.left) < 1);
-        assert.ok(Math.abs(tiles[1].rect.bottom + 15 - tiles[2].rect.top) < 1);
-      } else {
-        assert.ok(tiles.every(t => Math.abs(t.rect.height - 380) < 1 && t.rect.width <= width));
-        const scroll = await gallery.evaluate(el => ({ width: el.clientWidth, content: el.scrollWidth }));
-        assert.ok(scroll.content > scroll.width, `${width}px: gallery must scroll within its container`);
+      assert.equal(await page.locator('.gallery-section, .gallery-masonry, .lightbox').count(), 0, `${width}px: gallery DOM remains`);
+      assert.equal(await page.getByText(/Знакомое место\s*до первого визита/).count(), 0, `${width}px: heading remains`);
+      assert.equal(state.adjacent, true, `${width}px: reviews and FAQ must be adjacent siblings`);
+      assert.ok(Math.abs(state.reviewsBottom - state.faqTop) <= 1, `${width}px: empty gap between sections`);
+      assert.match(state.reviewText, /Опыт тех, кто уже обращался/);
+      assert.match(state.faqText, /Что важно знать перед обращением/);
+      assert.ok(state.overflow <= 1, `${width}px: horizontal overflow`);
+      assert.deepEqual(galleryRequests, [], `${width}px: gallery image requests remain`);
+      if (evidence && [1440, 390].includes(width)) {
+        await mkdir(evidence, { recursive: true });
+        await page.evaluate(() => scrollTo(0, scrollY + document.querySelector('.faq-section').getBoundingClientRect().top - innerHeight / 2));
+        await page.screenshot({ path: `${evidence}/reviews-to-faq-${width}.png` });
       }
-      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `${width}px: document horizontal overflow`);
-      if ([1440, 390].includes(width)) {
-        for (let i = 0; i < 3; i++) {
-          await gallery.locator('button').nth(i).click();
-          const photo = page.locator('.lightbox img');
-          assert.ok((await photo.getAttribute('src')).endsWith(`/site-GLOBAL/images/gallery/${names[i]}`));
-          assert.equal(await photo.getAttribute('alt'), alts[i]);
-          assert.ok(await photo.evaluate(img => img.complete && img.naturalWidth > 0));
-          if (evidence) await page.locator('.lightbox').screenshot({ path: `${evidence}/gallery-lightbox-${width}-${i + 1}.png` });
-          await page.locator('.lightbox-next').click();
-          assert.ok((await photo.getAttribute('src')).endsWith(`/site-GLOBAL/images/gallery/${names[(i + 1) % 3]}`));
-          await page.locator('.lightbox-prev').click();
-          assert.ok((await photo.getAttribute('src')).endsWith(`/site-GLOBAL/images/gallery/${names[i]}`));
-          await page.locator('.lightbox-close').click();
-          assert.equal(await page.locator('.lightbox').count(), 0);
-        }
-      }
-    });
+    }, galleryRequests);
   }
+});
+
+test('remaining menu, country, service, wizard and lead panels keep focus trap and Escape', async () => {
+  await withPage(390, async (page) => {
+    for (const [trigger, panel] of [
+      ['button[aria-label="Открыть меню"]', '.mobile-menu.open'],
+      ['.country-showcase .vc-2', '.country-modal'],
+      ['.service-feature .inline-actions button:first-child', '.service-modal'],
+      ['.hero-actions button:first-child', '.wizard'],
+      ['.faq-grid .btn', '.lead-modal'],
+    ]) {
+      const opener = page.locator(trigger);
+      await opener.click();
+      const dialog = page.locator(panel);
+      await dialog.waitFor();
+      const focusables = dialog.locator('button:not([disabled]),a[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled])');
+      assert.equal(await focusables.first().evaluate(el => document.activeElement === el), true, `${panel}: initial focus`);
+      await page.keyboard.press('Shift+Tab');
+      assert.equal(await focusables.last().evaluate(el => document.activeElement === el), true, `${panel}: reverse focus trap`);
+      await page.keyboard.press('Tab');
+      assert.equal(await focusables.first().evaluate(el => document.activeElement === el), true, `${panel}: forward focus trap`);
+      await page.keyboard.press('Escape');
+      assert.equal(await dialog.count(), 0, `${panel}: Escape closes panel`);
+      assert.equal(await opener.evaluate(el => document.activeElement === el), true, `${panel}: focus restored`);
+      assert.equal(await page.evaluate(() => document.body.style.overflow), '', `${panel}: scroll unlocked`);
+    }
+  });
 });
 
 test('point fixes preserve bounds and place hero stats only on mobile', async () => {

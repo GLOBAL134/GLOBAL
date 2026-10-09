@@ -10,7 +10,6 @@ import { OfficePhotoSlider, VisaPhotoSlider } from "../components/VisaPhotoSlide
 import {
   countries,
   countryGroups,
-  photos,
   popularDestinations,
   reviews,
   SCHENGEN_COUNTRIES,
@@ -26,7 +25,6 @@ import {
 } from "./site-data";
 
 const socialIconFiles = { Telegram: "social-telegram.webp", MAX: "social-max.webp", WhatsApp: "social-whatsapp.webp" };
-const galleryAlts = ["Пара с чемоданами в аэропорту", "Мужчина отдыхает в гамаке на пляже у моря", "Женщина на велосипеде у альпийского озера и гор"];
 const SocialContactIcon = ({ type }: { type: "Telegram" | "MAX" | "WhatsApp" }) => (
   <img className={`social-icon-${type.toLowerCase()}`} src={`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/images/${socialIconFiles[type]}`} width="32" height="32" alt="" aria-hidden="true" />
 );
@@ -136,7 +134,6 @@ export default function Home() {
     [wizardOpen, setWizardOpen] = useState(false),
     [wizardStep, setWizardStep] = useState(1),
     [wizard, setWizard] = useState(initialWizard),
-    [lightbox, setLightbox] = useState<number | null>(null),
     [reviewIndex, setReviewIndex] = useState(0),
     [applicants, setApplicants] = useState(1),
     [calcCountry, setCalcCountry] = useState("Япония"),
@@ -150,8 +147,7 @@ export default function Home() {
     Boolean(country) ||
     Boolean(lead) ||
     service !== null ||
-    wizardOpen ||
-    lightbox !== null;
+    wizardOpen;
   const activePanel = menu
     ? "menu"
     : country
@@ -162,9 +158,7 @@ export default function Home() {
           ? "service"
           : wizardOpen
             ? "wizard"
-            : lightbox !== null
-              ? "lightbox"
-              : "";
+            : "";
   useEffect(() => {
     const f = () => setScrolled(window.scrollY > 28);
     f();
@@ -216,7 +210,7 @@ export default function Home() {
     if (!previousFocus.current)
       previousFocus.current = document.activeElement as HTMLElement;
     const panel = document.querySelector<HTMLElement>(
-      ".mobile-menu.open, .overlay, .lightbox",
+      ".mobile-menu.open, .overlay",
     );
     const focusables = () =>
       Array.from(
@@ -250,16 +244,11 @@ export default function Home() {
         setLead(null);
         setService(null);
         setWizardOpen(false);
-        setLightbox(null);
       }
-      if (lightbox !== null && e.key === "ArrowRight")
-        setLightbox((lightbox + 1) % photos.length);
-      if (lightbox !== null && e.key === "ArrowLeft")
-        setLightbox((lightbox - 1 + photos.length) % photos.length);
     };
     window.addEventListener("keydown", f);
     return () => window.removeEventListener("keydown", f);
-  }, [lightbox]);
+  }, []);
   const heroResults = useMemo(
     () =>
       heroQuery
@@ -824,34 +813,6 @@ export default function Home() {
             </div>
           </div>
         </section>
-        <section className="section gallery-section">
-          <div className="container">
-            <div className="section-heading" data-reveal>
-              <div className="eyebrow">Пространство GLOBAL</div>
-              <h2 className="h2">
-                Знакомое место
-                <br />
-                до первого визита
-              </h2>
-            </div>
-            <div className="gallery-masonry">
-              {photos.map((p, i) => (
-                <button
-                  aria-label={`Открыть фотографию ${i + 1}`}
-                  key={p}
-                  onClick={() => setLightbox(i)}
-                >
-                  <img
-                    src={p}
-                    alt={galleryAlts[i]}
-                    loading={i ? "lazy" : "eager"}
-                  />
-                  <span>0{i + 1}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </section>
         <section id="faq" className="section faq-section">
           <div className="container faq-grid">
             <div>
@@ -1332,42 +1293,6 @@ export default function Home() {
               )}
             </div>
           </div>
-        </div>
-      )}
-      {lightbox !== null && (
-        <div
-          className="lightbox"
-          role="dialog"
-          aria-modal="true"
-          onClick={(e) => e.target === e.currentTarget && setLightbox(null)}
-        >
-          <button
-            className="lightbox-close"
-            aria-label="Закрыть галерею"
-            onClick={() => setLightbox(null)}
-          >
-            ×
-          </button>
-          <button
-            className="lightbox-prev"
-            aria-label="Предыдущая фотография"
-            onClick={() =>
-              setLightbox((lightbox - 1 + photos.length) % photos.length)
-            }
-          >
-            ←
-          </button>
-          <img src={photos[lightbox]} alt={galleryAlts[lightbox]} />
-          <button
-            className="lightbox-next"
-            aria-label="Следующая фотография"
-            onClick={() => setLightbox((lightbox + 1) % photos.length)}
-          >
-            →
-          </button>
-          <span>
-            {lightbox + 1} / {photos.length}
-          </span>
         </div>
       )}
     </>
