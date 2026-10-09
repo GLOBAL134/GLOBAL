@@ -1984,6 +1984,25 @@ summary:focus-visible {
   }
   .office-editorial {
     min-height: 450px;
+    display: flex;
+    flex-direction: column;
+    background: #101918;
+  }
+  .office-editorial::before {
+    content: "";
+    width: 100%;
+    aspect-ratio: 1280 / 834;
+    flex: none;
+  }
+  .office-editorial .photo-frame:is([data-photo-index="1"], [data-photo-index="2"]) img {
+    height: auto;
+    object-fit: contain;
+  }
+  .office-editorial > .office-caption {
+    position: relative;
+    inset: auto;
+    margin-top: auto;
+    padding: 20px 35px 30px;
   }
   .review-stage {
     grid-template-columns: 1fr;
