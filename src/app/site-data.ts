@@ -33,7 +33,17 @@ export type PopularDestination = Country | AggregateDestination;
 
 export const NEUTRAL_COUNTRY_SUMMARY =
   "Условия оформления зависят от цели поездки и ситуации заявителя. Оставьте заявку — специалист GLOBAL проконсультирует по вашему случаю.";
-export const CONTACT_EMAIL = "n9137871805@yandex.ru";
+export const organization = {
+  fullName: "Индивидуальный предприниматель Красюк Николай Александрович",
+  shortName: "ИП Красюк Н. А.",
+  inn: "544127911674",
+  ogrnip: "323547600070729",
+  officeAddress: "630132, г. Новосибирск, ул. Челюскинцев, 15 Б",
+  phone: "+7 (913) 787-18-05",
+  phoneHref: "tel:+79137871805",
+  email: "n9137871805@yandex.ru",
+} as const;
+export const CONTACT_EMAIL = organization.email;
 export const WHATSAPP_URL = "https://wa.me/79137871805";
 export const TELEGRAM_URL = "https://t.me/SVC_GLOBAL_NSK";
 export const MAX_URL = "https://max.ru/u/f9LHodD0cOL9XCvB0s54oOa-5DtER3blB5RfJKiYU-tE9NGhkphplmudTYk";
