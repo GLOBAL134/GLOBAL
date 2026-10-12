@@ -1,7 +1,10 @@
 /* Legal routes only: keep long operator/contact text inside narrow cards. */
 .legal-card { min-width: 0; overflow-wrap: anywhere; }
-.legal-card h1 { font-size: clamp(28px, 5.6vw, 68px); line-height: 1.12; overflow-wrap: anywhere; }
-.legal-card a { overflow-wrap: anywhere; }
+.legal-card h1 { margin: 12px 0 24px; font-size: clamp(28px, 5.6vw, 68px); font-weight: 650; line-height: 1.12; overflow-wrap: anywhere; }
+.legal-card h2 { margin: 1.7em 0 0.65em; font-size: clamp(20px, 2.2vw, 26px); font-weight: 650; line-height: 1.3; }
+.legal-card p { margin: 0 0 1em; }
+.legal-card a { overflow-wrap: anywhere; text-decoration: underline; text-underline-offset: 3px; }
+.legal-card > a:first-child { display: inline-block; margin-bottom: 24px; }
 @media (max-width: 390px) {
   .legal-page { padding: 32px 12px; }
   .legal-card { padding: 24px 18px; }
